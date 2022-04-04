@@ -1,0 +1,27 @@
+{
+  "pluginName": "时间戳日期转换",
+  "description": "支持毫秒和秒的时间戳，支持日期和时间戳互转",
+  "main": "index.html",
+  "version": "0.0.1",
+  "author": "Lainbo",
+  "logo": "logo.png",
+  "features": [
+    {
+      "code": "time",
+      "explain": "帮助您 日期 和 时间戳 相互转换的工具",
+      "cmds": [
+        "timeStamp",
+        "时间戳",
+        "sjc",
+        {
+          "type": "regex",
+          "label": "查询时间戳",
+          "match": "/^[0-9]{9,13}$/i",
+          "minLength": 9,
+          "maxLength": 13
+        }
+      ]
+    }
+  ],
+  "name": "ae3ee9f3"
+}
