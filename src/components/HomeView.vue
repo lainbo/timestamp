@@ -19,7 +19,7 @@
           <a-select
             size="large"
             v-model:model-value="timeZone"
-            :style="{ width: '290px' }"
+            :style="{ width: '235px' }"
             placeholder="请选择时区"
             allow-search
           >
@@ -31,12 +31,13 @@
             >
             </a-option>
           </a-select>
-          <span class="ml-4px inline-block">
+          <span class="inline-block">
             <a-popover title="注意">
-              <icon-exclamation-circle class="text-16px cursor-pointer" />
+              <icon-exclamation-circle class="text-16px cursor-pointer " />
               <template #content>
                 <p>时间戳→日期 操作中会根据对应国家是否执行夏令时</p>
-                <p>自动进行转换，并不是普通的对时间进行加减</p>
+                <p>自动进行转换，以转换结果为准，并不是普通的对时</p>
+                <p>间进行加减</p>
               </template>
             </a-popover>
           </span>
@@ -46,11 +47,12 @@
           <template #unchecked>☀️</template>
         </a-switch>
       </div>
+
       <div class="flex flex-col items-center justify-center">
         <a-form :model="formData" auto-label-width layout="vertical">
           <a-form-item label="日期 → 时间戳：">
             <a-date-picker
-              :style="{ width: '400px' }"
+              :style="{ width: '345px' }"
               v-model="formData.date"
               show-time
               :time-picker-props="{
@@ -68,14 +70,16 @@
               </span>
             </a-tooltip>
           </a-form-item>
+
           <a-divider></a-divider>
-          <a-form-item :label="`时间戳 → 日期：（${timeZoneText}）`">
+
+          <a-form-item :label="`时间戳 → 日期：(${timeZoneText})`">
             <a-input
               ref="timeInputRef"
               v-model="formData.time"
               placeholder="请输入时间戳"
               allow-clear
-              :style="{ width: '400px' }"
+              :style="{ width: '345px' }"
             />
             <a-tooltip content="点击复制" position="top" mini>
               <span
@@ -87,35 +91,58 @@
               </span>
             </a-tooltip>
           </a-form-item>
-          <a-divider></a-divider>
-          <a-form-item :label="`当前时间戳${btnIsStop ? '（已暂停）' : ''}：`">
-            <div class="space-x-8px flex items-center">
-              <div class="w-135px">
-                <a-tooltip content="点击复制" position="bottom" mini>
-                  <span
-                    class="cursor-pointer transition-all dynamic_timestamp inline-block dark:text-white"
-                    :class="{
-                      'text-blue-600 font-bold text-16px dark:text-white': btnIsStop,
-                    }"
-                    v-clipboard:copy="timeStamp"
-                    v-clipboard:success="onCopy"
-                  >
-                    {{ timeStamp }}
-                  </span>
-                </a-tooltip>
-              </div>
 
-              <a-button
-                type="text"
-                :status="btnIsStop ? 'success' : 'danger'"
-                @click="stopTimer"
-              >
-                <template #icon>
-                  <icon-play-arrow-fill v-if="btnIsStop" />
-                  <icon-pause v-else />
-                </template>
-                <template #default>{{ btnIsStop ? '继续' : '暂停' }}</template>
-              </a-button>
+          <a-divider></a-divider>
+
+          <a-form-item :label="`当前时间戳${btnIsStop ? '（已暂停）' : ''}：`">
+            <div class="flex justify-between flex-1">
+              <div class="space-x-8px flex items-center">
+                <div class="w-135px">
+                  <a-tooltip content="点击复制" position="bottom" mini>
+                    <span
+                      class="cursor-pointer transition-all dynamic_timestamp inline-block dark:text-white"
+                      :class="{
+                        'text-blue-600 font-bold text-16px dark:text-white': btnIsStop,
+                      }"
+                      v-clipboard:copy="timeStamp"
+                      v-clipboard:success="onCopy"
+                    >
+                      {{ timeStamp }}
+                    </span>
+                  </a-tooltip>
+                </div>
+
+                <a-button
+                  type="text"
+                  :status="btnIsStop ? 'success' : 'danger'"
+                  @click="stopTimer"
+                >
+                  <template #icon>
+                    <icon-play-arrow-fill v-if="btnIsStop" />
+                    <icon-pause v-else />
+                  </template>
+                  <template #default>
+                    {{ btnIsStop ? '继续' : '暂停' }}
+                  </template>
+                </a-button>
+              </div>
+              <div>
+                <a-popconfirm
+                  content-class="w-250px"
+                  content="单位、时区、页面数据将恢复为初始值，确定吗？"
+                  position="tr"
+                  @ok="resetData"
+                >
+                  <a-button size="small">
+                    <template #icon>
+                      <icon-refresh />
+                    </template>
+                    <template #default>
+                      清空数据
+                    </template>
+                  </a-button>
+                </a-popconfirm>
+              </div>
             </div>
           </a-form-item>
         </a-form>
@@ -132,15 +159,27 @@ import {
   IconPause,
   IconPlayArrowFill,
   IconExclamationCircle,
+  IconRefresh,
 } from '@arco-design/web-vue/es/icon'
 
-const timeZone = ref('Asia/Shanghai')
-const timezoneData = ref(TimezoneData)
+const timeZone = useStorage('defaultTimeZone', 'Asia/Shanghai') // 默认时区
+// const timeZone = ref('Asia/Shanghai') // 默认时区
+const timezoneData = ref(TimezoneData) // 时区数据
+
+// 返回对应时区文字
 const timeZoneText = computed(() => {
   return TimezoneData.find(
     item => item.value === timeZone.value
   ).code?.substring(12)
 })
+
+// 重置数据
+const resetData = () => {
+  formData.date = ''
+  formData.time = undefined
+  timeType.value = 'ms'
+  timeZone.value = 'Asia/Shanghai'
+}
 
 const pageIsDark = ref(false) // 开关绑定值
 // 手动切换主题
@@ -149,7 +188,8 @@ const changeTheme = val => {
 }
 
 const timeStamp = ref(0) // 底部动态时间戳
-const timeType = ref(localStorage.getItem('defaultUnit') || 'ms') // 单选框值，默认毫秒
+// const timeType = ref(localStorage.getItem('defaultUnit') || 'ms') // 单选框值，默认毫秒
+const timeType = useStorage('defaultUnit', 'ms') // 单选框值，默认毫秒
 
 // 日期 → 时间戳后面的文字
 const timeStampText = computed(() => {
@@ -299,7 +339,7 @@ const calcStaticStamp = () => {
 
 // 复制成功的提示
 const onCopy = () => {
-  Message.success('复制成功')
+  Message.success({ content: '复制成功', duration: 900 })
 }
 </script>
 

@@ -72,7 +72,7 @@ export const TimezoneData = [
     value: 'Asia/Kabul',
   },
   {
-    code: 'UTC+05:00 | 伊斯兰堡,卡拉奇',
+    code: 'UTC+05:00 | 伊斯兰堡',
     value: 'Asia/Karachi',
   },
   {
@@ -96,7 +96,7 @@ export const TimezoneData = [
     value: 'Asia/Bangkok',
   },
   {
-    code: 'UTC+08:00 | 北京,重庆,香港,乌鲁木齐',
+    code: 'UTC+08:00 | 北京',
     value: 'Asia/Shanghai',
   },
   {
@@ -112,7 +112,7 @@ export const TimezoneData = [
     value: 'Australia/Sydney',
   },
   {
-    code: 'UTC+11:00 | 所罗门群岛,新喀里多尼亚',
+    code: 'UTC+11:00 | 所罗门群岛',
     value: 'Pacific/Guadalcanal',
   },
   {

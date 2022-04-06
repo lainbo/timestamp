@@ -8,6 +8,7 @@ import utc from 'dayjs/plugin/utc'
 dayjs.extend(utc)
 dayjs.extend(timezone)
 import '@arco-design/web-vue/es/message/style/css.js'
+
 createApp(App)
   .use(VueClipboard, {
     autoSetContainer: true,
