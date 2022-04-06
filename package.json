@@ -11,7 +11,7 @@
   "dependencies": {
     "@vueuse/core": "^8.2.4",
     "dayjs": "^1.11.0",
-    "vue": "^3.2.25",
+    "vue": "^3.2.31",
     "vue3-clipboard": "^1.0.0"
   },
   "devDependencies": {

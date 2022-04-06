@@ -6,15 +6,41 @@
       class="p-32px pt-16px rounded-8px shadow-xl w-11/12 min-w-500px dark:shadow-black dark:shadow-lg"
     >
       <div class="mb-16px flex justify-between items-center">
-        <a-radio-group
-          v-model="timeType"
-          @change="changeRadio"
-          type="button"
-          size="large"
-        >
-          <a-radio value="ms">毫秒</a-radio>
-          <a-radio value="s">秒</a-radio>
-        </a-radio-group>
+        <div class="space-x-10px">
+          <a-radio-group
+            v-model="timeType"
+            @change="changeRadio"
+            type="button"
+            size="large"
+          >
+            <a-radio value="ms">毫秒</a-radio>
+            <a-radio value="s">秒</a-radio>
+          </a-radio-group>
+          <a-select
+            size="large"
+            v-model:model-value="timeZone"
+            :style="{ width: '290px' }"
+            placeholder="请选择时区"
+            allow-search
+          >
+            <a-option
+              v-for="item in timezoneData"
+              :key="item.value"
+              :label="item.code"
+              :value="item.value"
+            >
+            </a-option>
+          </a-select>
+          <span class="ml-4px inline-block">
+            <a-popover title="注意">
+              <icon-exclamation-circle class="text-16px cursor-pointer" />
+              <template #content>
+                <p>时间戳→日期 操作中会根据对应国家是否执行夏令时</p>
+                <p>自动进行转换，并不是普通的对时间进行加减</p>
+              </template>
+            </a-popover>
+          </span>
+        </div>
         <a-switch type="round" @change="changeTheme" v-model="pageIsDark">
           <template #checked>🌙</template>
           <template #unchecked>☀️</template>
@@ -24,7 +50,7 @@
         <a-form :model="formData" auto-label-width layout="vertical">
           <a-form-item label="日期 → 时间戳：">
             <a-date-picker
-              :style="{ width: '220px' }"
+              :style="{ width: '400px' }"
               v-model="formData.date"
               show-time
               :time-picker-props="{
@@ -43,21 +69,22 @@
             </a-tooltip>
           </a-form-item>
           <a-divider></a-divider>
-          <a-form-item label="时间戳 → 日期：">
+          <a-form-item :label="`时间戳 → 日期：（${timeZoneText}）`">
             <a-input
               ref="timeInputRef"
               v-model="formData.time"
               placeholder="请输入时间戳"
               allow-clear
-              :style="{ width: '220px' }"
+              :style="{ width: '400px' }"
             />
             <a-tooltip content="点击复制" position="top" mini>
               <span
                 class="inline-block ml-16px cursor-pointer font-bold text-16px dark:text-white"
                 v-clipboard:copy="timeText"
                 v-clipboard:success="onCopy"
-                >{{ timeText || '-' }}</span
               >
+                {{ timeText || '-' }}
+              </span>
             </a-tooltip>
           </a-form-item>
           <a-divider></a-divider>
@@ -99,8 +126,21 @@
 
 <script setup>
 import dayjs from 'dayjs'
+import { TimezoneData } from '@/assets/timezone/TimezoneData.js'
 import { Message } from '@arco-design/web-vue'
-import { IconPause, IconPlayArrowFill } from '@arco-design/web-vue/es/icon'
+import {
+  IconPause,
+  IconPlayArrowFill,
+  IconExclamationCircle,
+} from '@arco-design/web-vue/es/icon'
+
+const timeZone = ref('Asia/Shanghai')
+const timezoneData = ref(TimezoneData)
+const timeZoneText = computed(() => {
+  return TimezoneData.find(
+    item => item.value === timeZone.value
+  ).code?.substring(12)
+})
 
 const pageIsDark = ref(false) // 开关绑定值
 // 手动切换主题
@@ -115,19 +155,30 @@ const timeType = ref(localStorage.getItem('defaultUnit') || 'ms') // 单选框�
 const timeStampText = computed(() => {
   return formData.date
     ? timeType.value === 'ms'
-      ? dayjs(formData.date).valueOf()
-      : dayjs(formData.date).unix()
+      ? dayjs(formData.date)
+          .tz(timeZone.value)
+          .valueOf()
+      : dayjs(formData.date)
+          .tz(timeZone.value)
+          .unix()
     : '-'
 })
 
 // 时间戳 → 日期后面的文字
 const timeText = computed(() => {
   const time = parseInt(formData.time)
-  return time
-    ? timeType.value === 'ms'
-      ? dayjs(time).format('YYYY-MM-DD HH:mm:ss')
-      : dayjs.unix(time).format('YYYY-MM-DD HH:mm:ss')
-    : '-'
+
+  // 毫秒单位的日期字符串
+  const msDateText = dayjs(time)
+    .tz(timeZone.value)
+    .format('YYYY-MM-DD HH:mm:ss')
+
+  // 秒单位的日期字符串
+  const sDateText = dayjs
+    .unix(time)
+    .tz(timeZone.value)
+    .format('YYYY-MM-DD HH:mm:ss')
+  return time ? (timeType.value === 'ms' ? msDateText : sDateText) : '-'
 })
 
 // 两个输入框
@@ -178,11 +229,10 @@ const utoolsInit = () => {
 }
 
 const isDark = useDark() // 响应式：是否为暗色
-
 // 监听是否暗色
 watch(isDark, () => utoolsSetTheme())
-
 const htmlDom = document.documentElement // html的dom
+
 // 切换为深色
 const setThemeDark = () => {
   pageIsDark.value = true
@@ -216,23 +266,35 @@ const changeRadio = val => {
 
 // 计算底部动态时间戳的值
 const calctimeStamp = () => {
-  timeStamp.value =
-    timeType.value === 'ms'
-      ? String(dayjs().valueOf())
-          .substring(0, 10)
-          .padEnd(13, '0')
-      : String(dayjs().unix())
+  // 毫秒时间戳文字
+  const msText = String(
+    dayjs()
+      .tz(timeZone.value)
+      .valueOf()
+  )
+    .substring(0, 10)
+    .padEnd(13, '0')
+
+  // 秒时间戳文字
+  const sText = String(
+    dayjs()
+      .tz(timeZone.value)
+      .unix()
+  )
+  timeStamp.value = timeType.value === 'ms' ? msText : sText
 }
 
 // 计算暂停时，底部动态时间戳的值
 // 因为是暂停的，所以不需要dayjs，切割字符串即可
 const calcStaticStamp = () => {
-  timeStamp.value =
-    timeType.value === 'ms'
-      ? String(timeStamp.value)
-          .substring(0, 10)
-          .padEnd(13, '0')
-      : String(timeStamp.value).substring(0, 10)
+  // 毫秒时间戳文字
+  const msText = String(timeStamp.value)
+    .substring(0, 10)
+    .padEnd(13, '0')
+
+  // 秒时间戳文字
+  const sText = String(timeStamp.value).substring(0, 10)
+  timeStamp.value = timeType.value === 'ms' ? msText : sText
 }
 
 // 复制成功的提示
