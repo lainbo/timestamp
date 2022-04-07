@@ -163,7 +163,6 @@ import {
 } from '@arco-design/web-vue/es/icon'
 
 const timeZone = useStorage('defaultTimeZone', 'Asia/Shanghai') // 默认时区
-// const timeZone = ref('Asia/Shanghai') // 默认时区
 const timezoneData = ref(TimezoneData) // 时区数据
 
 // 返回对应时区文字
@@ -188,20 +187,29 @@ const changeTheme = val => {
 }
 
 const timeStamp = ref(0) // 底部动态时间戳
-// const timeType = ref(localStorage.getItem('defaultUnit') || 'ms') // 单选框值，默认毫秒
 const timeType = useStorage('defaultUnit', 'ms') // 单选框值，默认毫秒
 
 // 日期 → 时间戳后面的文字
 const timeStampText = computed(() => {
-  return formData.date
-    ? timeType.value === 'ms'
-      ? dayjs(formData.date)
-          .tz(timeZone.value)
-          .valueOf()
-      : dayjs(formData.date)
-          .tz(timeZone.value)
-          .unix()
-    : '-'
+  // 毫秒下的时间戳字符串
+  const msText = dayjs(formData.date)
+    .tz(timeZone.value)
+    .valueOf()
+
+  // 秒下的时间戳字符串
+  const sText = dayjs(formData.date)
+    .tz(timeZone.value)
+    .unix()
+
+  if (formData?.date) {
+    if (timeType.value === 'ms') {
+      return msText
+    } else {
+      return sText
+    }
+  } else {
+    return '-'
+  }
 })
 
 // 时间戳 → 日期后面的文字
@@ -218,7 +226,16 @@ const timeText = computed(() => {
     .unix(time)
     .tz(timeZone.value)
     .format('YYYY-MM-DD HH:mm:ss')
-  return time ? (timeType.value === 'ms' ? msDateText : sDateText) : '-'
+
+  if (time) {
+    if (timeType.value === 'ms') {
+      return msDateText
+    } else {
+      return sDateText
+    }
+  } else {
+    return '-'
+  }
 })
 
 // 两个输入框
