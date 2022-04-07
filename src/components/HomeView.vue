@@ -192,6 +192,8 @@ const timeType = useStorage('defaultUnit', 'ms') // 单选框值，默认毫秒
 // 日期 → 时间戳后面的文字
 const timeStampText = computed(() => {
   // 毫秒下的时间戳字符串
+  if (!formData?.date) return '-'
+
   const msText = dayjs(formData.date)
     .tz(timeZone.value)
     .valueOf()
@@ -201,20 +203,13 @@ const timeStampText = computed(() => {
     .tz(timeZone.value)
     .unix()
 
-  if (formData?.date) {
-    if (timeType.value === 'ms') {
-      return msText
-    } else {
-      return sText
-    }
-  } else {
-    return '-'
-  }
+  return timeType.value === 'ms' ? msText : sText
 })
 
 // 时间戳 → 日期后面的文字
 const timeText = computed(() => {
   const time = parseInt(formData.time)
+  if (isNaN(time) || time < 0) return '-'
 
   // 毫秒单位的日期字符串
   const msDateText = dayjs(time)
@@ -227,15 +222,7 @@ const timeText = computed(() => {
     .tz(timeZone.value)
     .format('YYYY-MM-DD HH:mm:ss')
 
-  if (time) {
-    if (timeType.value === 'ms') {
-      return msDateText
-    } else {
-      return sDateText
-    }
-  } else {
-    return '-'
-  }
+  return timeType.value === 'ms' ? msDateText : sDateText
 })
 
 // 两个输入框
@@ -308,11 +295,7 @@ const setThemeLight = () => {
 
 // utools主题初始化
 const utoolsSetTheme = () => {
-  if (isDark.value) {
-    setThemeDark()
-  } else {
-    setThemeLight()
-  }
+  isDark.value ? setThemeDark() : setThemeLight()
 }
 
 // 切换单选，重新渲染底部动态时间戳的显示
