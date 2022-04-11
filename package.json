@@ -15,7 +15,7 @@
     "vue3-clipboard": "^1.0.0"
   },
   "devDependencies": {
-    "@arco-design/web-vue": "^2.22.1",
+    "@arco-design/web-vue": "^2.23.0",
     "@vitejs/plugin-vue": "^2.3.0",
     "@vue/eslint-config-prettier": "^6.0.0",
     "babel-eslint": "^10.1.0",

@@ -209,7 +209,7 @@ const timeStampText = computed(() => {
 // 时间戳 → 日期后面的文字
 const timeText = computed(() => {
   const time = parseInt(formData.time)
-  if (isNaN(time) || time < 0) return '-'
+  if (isNaN(time)) return '-'
 
   // 毫秒单位的日期字符串
   const msDateText = dayjs(time)
@@ -233,7 +233,7 @@ const formData = reactive({
 
 onMounted(() => {
   init()
-  utoolsSetTheme()
+  setTheme()
   if (!window?.utools) return
   utoolsInit()
 })
@@ -274,7 +274,7 @@ const utoolsInit = () => {
 
 const isDark = useDark() // 响应式：是否为暗色
 // 监听是否暗色
-watch(isDark, () => utoolsSetTheme())
+watch(isDark, () => setTheme())
 const htmlDom = document.documentElement // html的dom
 
 // 切换为深色
@@ -293,14 +293,14 @@ const setThemeLight = () => {
   document.body.removeAttribute('arco-theme')
 }
 
-// utools主题初始化
-const utoolsSetTheme = () => {
+// 主题初始化
+const setTheme = () => {
   isDark.value ? setThemeDark() : setThemeLight()
 }
 
 // 切换单选，重新渲染底部动态时间戳的显示
 const changeRadio = val => {
-  localStorage.setItem('defaultUnit', val)
+  timeType.value = val
   btnIsStop.value ? calcStaticStamp() : calctimeStamp()
 }
 
