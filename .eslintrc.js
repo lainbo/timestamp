@@ -7,8 +7,7 @@ module.exports = {
     'plugin:vue/vue3-essential',
     'eslint:recommended',
     '@vue/prettier',
-    './.eslintrc-auto-import.json',
-    // "vue-global-api",
+    './.eslintrc-auto-import.json'
   ],
   parserOptions: {
     parser: 'babel-eslint',
