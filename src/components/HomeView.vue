@@ -129,7 +129,7 @@
               <div>
                 <a-popconfirm
                   content-class="w-250px"
-                  content="单位、时区、页面数据将恢复为初始值，确定吗？"
+                  content="时间戳的单位、时区、页面数据将恢复为初始值，确定吗？"
                   position="tr"
                   @ok="resetData"
                 >
@@ -138,7 +138,7 @@
                       <icon-refresh />
                     </template>
                     <template #default>
-                      清空数据
+                      重置数据
                     </template>
                   </a-button>
                 </a-popconfirm>
@@ -232,33 +232,57 @@ const formData = reactive({
 })
 
 onMounted(() => {
-  init()
   setTheme()
   if (!window?.utools) return
   utoolsInit()
 })
 
-const timer = ref(null) // 动态时间戳定时器
 const btnIsStop = ref(false) // 按钮状态，是否停止
 // 开始/停止按钮
 const stopTimer = () => {
-  if (timer.value) {
+  if (!btnIsStop.value) {
+    pause()
     btnIsStop.value = true
-    clearInterval(timer.value)
-    timer.value = null
   } else {
+    resume()
     btnIsStop.value = false
-    init()
   }
 }
+// 计算底部动态时间戳的值
+const calctimeStamp = () => {
+  // 毫秒时间戳文字
+  const msText = String(
+    dayjs()
+      .tz(timeZone.value)
+      .valueOf()
+  )
+    .substring(0, 10)
+    .padEnd(13, '0')
 
-// 页面数据初始化，并开始定时器
-const init = () => {
-  calctimeStamp()
-  timer.value = setInterval(() => {
-    calctimeStamp()
-  }, 100)
+  // 秒时间戳文字
+  const sText = String(
+    dayjs()
+      .tz(timeZone.value)
+      .unix()
+  )
+  timeStamp.value = timeType.value === 'ms' ? msText : sText
 }
+
+// 计算暂停时，底部动态时间戳的值
+// 因为是暂停的，所以不需要dayjs，切割字符串即可
+const calcStaticStamp = () => {
+  // 毫秒时间戳文字
+  const msText = String(timeStamp.value)
+    .substring(0, 10)
+    .padEnd(13, '0')
+
+  // 秒时间戳文字
+  const sText = String(timeStamp.value).substring(0, 10)
+  timeStamp.value = timeType.value === 'ms' ? msText : sText
+}
+
+// 页面自动初始化
+const { pause, resume } = useRafFn(calctimeStamp)
 
 // utools数据初始化
 const timeInputRef = ref(null) // 文本输入框的dom
@@ -302,39 +326,6 @@ const setTheme = () => {
 const changeRadio = val => {
   timeType.value = val
   btnIsStop.value ? calcStaticStamp() : calctimeStamp()
-}
-
-// 计算底部动态时间戳的值
-const calctimeStamp = () => {
-  // 毫秒时间戳文字
-  const msText = String(
-    dayjs()
-      .tz(timeZone.value)
-      .valueOf()
-  )
-    .substring(0, 10)
-    .padEnd(13, '0')
-
-  // 秒时间戳文字
-  const sText = String(
-    dayjs()
-      .tz(timeZone.value)
-      .unix()
-  )
-  timeStamp.value = timeType.value === 'ms' ? msText : sText
-}
-
-// 计算暂停时，底部动态时间戳的值
-// 因为是暂停的，所以不需要dayjs，切割字符串即可
-const calcStaticStamp = () => {
-  // 毫秒时间戳文字
-  const msText = String(timeStamp.value)
-    .substring(0, 10)
-    .padEnd(13, '0')
-
-  // 秒时间戳文字
-  const sText = String(timeStamp.value).substring(0, 10)
-  timeStamp.value = timeType.value === 'ms' ? msText : sText
 }
 
 // 复制成功的提示
