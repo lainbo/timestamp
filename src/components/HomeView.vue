@@ -178,6 +178,7 @@ const resetData = () => {
   formData.time = undefined
   timeType.value = 'ms'
   timeZone.value = 'Asia/Shanghai'
+  Message.success({ content: '已重置', duration: 1000 })
 }
 
 const pageIsDark = ref(false) // 开关绑定值
@@ -330,7 +331,7 @@ const changeRadio = val => {
 
 // 复制成功的提示
 const onCopy = () => {
-  Message.success({ content: '复制成功', duration: 900 })
+  Message.success({ content: '复制成功', duration: 1000 })
 }
 </script>
 
