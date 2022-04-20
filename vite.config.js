@@ -26,7 +26,7 @@ export default defineConfig({
     chunkSplitPlugin({
       strategy: 'default',
       customSplitting: {
-        utils: [/src\/utils/, /src\/assets/, 'dayjs', '@vueuse/core'],
+        customize: [/src\/utils/, /src\/assets/],
         'component-library': ['@arco-design/web-vue']
       }
     })
