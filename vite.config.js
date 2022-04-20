@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite'
 import { resolve } from 'path'
 import { ArcoResolver } from 'unplugin-vue-components/resolvers'
+import { chunkSplitPlugin } from 'vite-plugin-chunk-split'
 import WindiCSS from 'vite-plugin-windicss'
 import vue from '@vitejs/plugin-vue'
 import Components from 'unplugin-vue-components/vite'
@@ -15,23 +16,30 @@ export default defineConfig({
       eslintrc: {
         enabled: true,
         filepath: './.eslintrc-auto-import.json',
-        globalsPropValue: true,
+        globalsPropValue: true
       },
-      imports: ['vue', '@vueuse/core'],
+      imports: ['vue', '@vueuse/core']
     }),
     Components({
-      resolvers: [ArcoResolver()],
+      resolvers: [ArcoResolver()]
     }),
+    chunkSplitPlugin({
+      strategy: 'default',
+      customSplitting: {
+        utils: [/src\/utils/, /src\/assets/, 'dayjs', '@vueuse/core'],
+        'component-library': ['@arco-design/web-vue']
+      }
+    })
   ],
   resolve: {
     alias: {
-      '@': resolve(__dirname, './src'),
-    },
+      '@': resolve(__dirname, './src')
+    }
   },
   build: {
     assetsInlineLimit: 4096,
     cssCodeSplit: true,
     sourcemap: false,
-    minify: 'terser',
-  },
+    minify: 'terser'
+  }
 })

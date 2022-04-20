@@ -9,16 +9,16 @@
         <div class="space-x-10px">
           <a-radio-group
             v-model="timeType"
-            @change="changeRadio"
             type="button"
             size="large"
+            @change="changeRadio"
           >
-            <a-radio value="ms">毫秒</a-radio>
-            <a-radio value="s">秒</a-radio>
+            <a-radio value="ms"> 毫秒 </a-radio>
+            <a-radio value="s"> 秒 </a-radio>
           </a-radio-group>
           <a-select
-            size="large"
             v-model:model-value="timeZone"
+            size="large"
             :style="{ width: '235px' }"
             placeholder="请选择时区"
             allow-search
@@ -28,8 +28,7 @@
               :key="item.value"
               :label="item.code"
               :value="item.value"
-            >
-            </a-option>
+            />
           </a-select>
           <span class="inline-block">
             <a-popover title="注意">
@@ -42,9 +41,9 @@
             </a-popover>
           </span>
         </div>
-        <a-switch type="round" @change="changeTheme" v-model="pageIsDark">
-          <template #checked>🌙</template>
-          <template #unchecked>☀️</template>
+        <a-switch v-model="pageIsDark" type="round" @change="changeTheme">
+          <template #checked> 🌙 </template>
+          <template #unchecked> ☀️ </template>
         </a-switch>
       </div>
 
@@ -52,26 +51,26 @@
         <a-form :model="formData" auto-label-width layout="vertical">
           <a-form-item label="日期 → 时间戳：">
             <a-date-picker
-              :style="{ width: '345px' }"
               v-model="formData.date"
+              :style="{ width: '345px' }"
               show-time
               :time-picker-props="{
-                defaultValue: dayjs().startOf('day'),
+                defaultValue: '00:00:00'
               }"
               format="YYYY-MM-DD HH:mm:ss"
             />
             <a-tooltip content="点击复制" position="top" mini>
               <span
-                class="inline-block ml-16px cursor-pointer font-bold text-16px dark:text-white"
                 v-clipboard:copy="timeStampText"
                 v-clipboard:success="onCopy"
+                class="inline-block ml-16px cursor-pointer font-bold text-16px dark:text-white"
               >
                 {{ timeStampText || '-' }}
               </span>
             </a-tooltip>
           </a-form-item>
 
-          <a-divider></a-divider>
+          <a-divider />
 
           <a-form-item :label="`时间戳 → 日期：(${timeZoneText})`">
             <a-input
@@ -83,16 +82,16 @@
             />
             <a-tooltip content="点击复制" position="top" mini>
               <span
-                class="inline-block ml-16px cursor-pointer font-bold text-16px dark:text-white"
                 v-clipboard:copy="timeText"
                 v-clipboard:success="onCopy"
+                class="inline-block ml-16px cursor-pointer font-bold text-16px dark:text-white"
               >
                 {{ timeText || '-' }}
               </span>
             </a-tooltip>
           </a-form-item>
 
-          <a-divider></a-divider>
+          <a-divider />
 
           <a-form-item :label="`当前时间戳${btnIsStop ? '（已暂停）' : ''}：`">
             <div class="flex justify-between flex-1">
@@ -100,13 +99,13 @@
                 <div class="w-135px">
                   <a-tooltip content="点击复制" position="bottom" mini>
                     <span
+                      v-clipboard:copy="timeStamp"
+                      v-clipboard:success="onCopy"
                       class="cursor-pointer transition-all dynamic_timestamp inline-block dark:text-white"
                       :class="{
                         'text-blue-600 font-bold text-16px dark:text-white':
-                          btnIsStop,
+                          btnIsStop
                       }"
-                      v-clipboard:copy="timeStamp"
-                      v-clipboard:success="onCopy"
                     >
                       {{ timeStamp }}
                     </span>
@@ -158,7 +157,7 @@ import {
   IconPause,
   IconPlayArrowFill,
   IconExclamationCircle,
-  IconRefresh,
+  IconRefresh
 } from '@arco-design/web-vue/es/icon'
 
 const timeZone = useStorage('defaultTimeZone', 'Asia/Shanghai') // 默认时区
@@ -167,7 +166,7 @@ const timezoneData = ref(TimezoneData) // 时区数据
 // 返回对应时区文字
 const timeZoneText = computed(() => {
   return TimezoneData.find(
-    (item) => item.value === timeZone.value
+    item => item.value === timeZone.value
   ).code?.substring(12)
 })
 
@@ -182,7 +181,7 @@ const resetData = () => {
 
 const pageIsDark = ref(false) // 开关绑定值
 // 手动切换主题
-const changeTheme = (val) => {
+const changeTheme = val => {
   val ? setThemeDark() : setThemeLight()
 }
 
@@ -191,9 +190,9 @@ const timeType = useStorage('defaultUnit', 'ms') // 单选框值，默认毫秒
 
 // 日期 → 时间戳后面的文字
 const timeStampText = computed(() => {
-  // 毫秒下的时间戳字符串
   if (!formData?.date) return '-'
 
+  // 毫秒下的时间戳字符串
   const msText = dayjs(formData.date).tz(timeZone.value).valueOf()
 
   // 秒下的时间戳字符串
@@ -224,7 +223,7 @@ const timeText = computed(() => {
 // 两个输入框
 const formData = reactive({
   date: '', // 日期
-  time: undefined, // 时间戳
+  time: undefined // 时间戳
 })
 
 onMounted(() => {
@@ -309,7 +308,7 @@ const setTheme = () => {
 }
 
 // 切换单选，重新渲染底部动态时间戳的显示
-const changeRadio = (val) => {
+const changeRadio = val => {
   timeType.value = val
   btnIsStop.value ? calcStaticStamp() : calctimeStamp()
 }
