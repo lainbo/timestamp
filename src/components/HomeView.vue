@@ -33,7 +33,7 @@
           </a-select>
           <span class="inline-block">
             <a-popover title="注意">
-              <icon-exclamation-circle class="text-16px cursor-pointer " />
+              <icon-exclamation-circle class="text-16px cursor-pointer" />
               <template #content>
                 <p>时间戳→日期 操作中会根据对应国家是否执行夏令时</p>
                 <p>自动进行转换，以转换结果为准，并不是普通的对时</p>
@@ -102,7 +102,8 @@
                     <span
                       class="cursor-pointer transition-all dynamic_timestamp inline-block dark:text-white"
                       :class="{
-                        'text-blue-600 font-bold text-16px dark:text-white': btnIsStop,
+                        'text-blue-600 font-bold text-16px dark:text-white':
+                          btnIsStop,
                       }"
                       v-clipboard:copy="timeStamp"
                       v-clipboard:success="onCopy"
@@ -137,9 +138,7 @@
                     <template #icon>
                       <icon-refresh />
                     </template>
-                    <template #default>
-                      重置数据
-                    </template>
+                    <template #default> 重置数据 </template>
                   </a-button>
                 </a-popconfirm>
               </div>
@@ -168,7 +167,7 @@ const timezoneData = ref(TimezoneData) // 时区数据
 // 返回对应时区文字
 const timeZoneText = computed(() => {
   return TimezoneData.find(
-    item => item.value === timeZone.value
+    (item) => item.value === timeZone.value
   ).code?.substring(12)
 })
 
@@ -183,7 +182,7 @@ const resetData = () => {
 
 const pageIsDark = ref(false) // 开关绑定值
 // 手动切换主题
-const changeTheme = val => {
+const changeTheme = (val) => {
   val ? setThemeDark() : setThemeLight()
 }
 
@@ -195,14 +194,10 @@ const timeStampText = computed(() => {
   // 毫秒下的时间戳字符串
   if (!formData?.date) return '-'
 
-  const msText = dayjs(formData.date)
-    .tz(timeZone.value)
-    .valueOf()
+  const msText = dayjs(formData.date).tz(timeZone.value).valueOf()
 
   // 秒下的时间戳字符串
-  const sText = dayjs(formData.date)
-    .tz(timeZone.value)
-    .unix()
+  const sText = dayjs(formData.date).tz(timeZone.value).unix()
 
   return timeType.value === 'ms' ? msText : sText
 })
@@ -252,20 +247,12 @@ const stopTimer = () => {
 // 计算底部动态时间戳的值
 const calctimeStamp = () => {
   // 毫秒时间戳文字
-  const msText = String(
-    dayjs()
-      .tz(timeZone.value)
-      .valueOf()
-  )
+  const msText = String(dayjs().tz(timeZone.value).valueOf())
     .substring(0, 10)
     .padEnd(13, '0')
 
   // 秒时间戳文字
-  const sText = String(
-    dayjs()
-      .tz(timeZone.value)
-      .unix()
-  )
+  const sText = String(dayjs().tz(timeZone.value).unix())
   timeStamp.value = timeType.value === 'ms' ? msText : sText
 }
 
@@ -273,9 +260,7 @@ const calctimeStamp = () => {
 // 因为是暂停的，所以不需要dayjs，切割字符串即可
 const calcStaticStamp = () => {
   // 毫秒时间戳文字
-  const msText = String(timeStamp.value)
-    .substring(0, 10)
-    .padEnd(13, '0')
+  const msText = String(timeStamp.value).substring(0, 10).padEnd(13, '0')
 
   // 秒时间戳文字
   const sText = String(timeStamp.value).substring(0, 10)
@@ -324,7 +309,7 @@ const setTheme = () => {
 }
 
 // 切换单选，重新渲染底部动态时间戳的显示
-const changeRadio = val => {
+const changeRadio = (val) => {
   timeType.value = val
   btnIsStop.value ? calcStaticStamp() : calctimeStamp()
 }
