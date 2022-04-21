@@ -3,10 +3,10 @@
     class="contain w-screen h-screen flex flex-col items-center pt-32px bg-white dark:bg-dark-300"
   >
     <div
-      class="p-32px pt-16px rounded-8px shadow-xl w-11/12 min-w-500px dark:shadow-black dark:shadow-lg"
+      class="card p-32px pt-16px rounded-8px shadow-xl w-11/12 min-w-500px dark:shadow-black dark:shadow-lg"
     >
       <div class="mb-16px flex justify-between items-center">
-        <div class="space-x-10px">
+        <div class="space-x-11px">
           <a-radio-group
             v-model="timeType"
             type="button"
@@ -32,7 +32,9 @@
           </a-select>
           <span class="inline-block">
             <a-popover title="注意">
-              <icon-exclamation-circle class="text-16px cursor-pointer" />
+              <icon-exclamation-circle
+                class="text-16px cursor-pointer dark:text-white"
+              />
               <template #content>
                 <p>时间戳→日期 操作中会根据对应国家是否执行夏令时</p>
                 <p>自动进行转换，以转换结果为准，并不是普通的对时</p>
@@ -291,6 +293,12 @@ const onCopy = () => {
 </script>
 
 <style lang="scss" scoped>
+.contain {
+  transition: all 0.4s ease;
+  .card {
+    transition: all 0.4s ease;
+  }
+}
 .dynamic_timestamp {
   // 等宽数字
   font-feature-settings: 'tnum';
