@@ -151,6 +151,7 @@
 
 <script setup>
 import dayjs from 'dayjs'
+import { setTheme, pageIsDark } from '@/utils/theme.js'
 import { TimezoneData } from '@/assets/timezone/TimezoneData.js'
 import { Message } from '@arco-design/web-vue'
 import {
@@ -179,11 +180,8 @@ const resetData = () => {
   Message.success({ content: '已重置', duration: 1000 })
 }
 
-const pageIsDark = ref(false) // 开关绑定值
 // 手动切换主题
-const changeTheme = val => {
-  val ? setThemeDark() : setThemeLight()
-}
+const changeTheme = val => setTheme(val)
 
 const timeStamp = ref(0) // 底部动态时间戳
 const timeType = useStorage('defaultUnit', 'ms') // 单选框值，默认毫秒
@@ -227,7 +225,6 @@ const formData = reactive({
 })
 
 onMounted(() => {
-  setTheme()
   if (!window?.utools) return
   utoolsInit()
 })
@@ -279,32 +276,6 @@ const utoolsInit = () => {
     }
   })
   window.utools.subInputBlur()
-}
-
-const isDark = useDark() // 响应式：是否为暗色
-// 监听是否暗色
-watch(isDark, () => setTheme())
-const htmlDom = document.documentElement // html的dom
-
-// 切换为深色
-const setThemeDark = () => {
-  pageIsDark.value = true
-  htmlDom.classList.remove('light')
-  htmlDom.classList.add('dark')
-  document.body.setAttribute('arco-theme', 'dark')
-}
-
-// 切换为浅色
-const setThemeLight = () => {
-  pageIsDark.value = false
-  htmlDom.classList.remove('dark')
-  htmlDom.classList.add('light')
-  document.body.removeAttribute('arco-theme')
-}
-
-// 主题初始化
-const setTheme = () => {
-  isDark.value ? setThemeDark() : setThemeLight()
 }
 
 // 切换单选，重新渲染底部动态时间戳的显示
