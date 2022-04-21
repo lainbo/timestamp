@@ -1,6 +1,7 @@
 import { createApp } from 'vue'
 import App from './App.vue'
 import 'virtual:windi.css'
+import '@/styles/global.scss'
 import VueClipboard from 'vue3-clipboard'
 import dayjs from 'dayjs'
 import timezone from 'dayjs/plugin/timezone'

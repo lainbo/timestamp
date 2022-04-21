@@ -36,9 +36,9 @@
                 class="text-16px cursor-pointer dark:text-white"
               />
               <template #content>
-                <p>时间戳→日期 操作中会根据对应国家是否执行夏令时</p>
-                <p>自动进行转换，以转换结果为准，并不是普通的对时</p>
-                <p>间进行加减</p>
+                <p>
+                  时间戳→日期操作中，会根据对应国家是否执行夏令时自动进行转换，以转换结果为准，并不是普通的对时间进行加减
+                </p>
               </template>
             </a-popover>
           </span>
