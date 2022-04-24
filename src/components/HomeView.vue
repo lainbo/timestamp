@@ -57,7 +57,7 @@
               :style="{ width: '345px' }"
               show-time
               :time-picker-props="{
-                defaultValue: '00:00:00'
+                defaultValue: dayjs().startOf('day')
               }"
               format="YYYY-MM-DD HH:mm:ss"
             />

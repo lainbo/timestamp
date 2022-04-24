@@ -10,15 +10,14 @@
   },
   "dependencies": {
     "@vueuse/core": "^8.2.4",
-    "dayjs": "^1.11.0",
+    "dayjs": "^1.11.1",
     "vue": "^3.2.33",
     "vue3-clipboard": "^1.0.0"
   },
   "devDependencies": {
-    "@arco-design/web-vue": "^2.24.1",
+    "@arco-design/web-vue": "^2.25.0",
     "@vitejs/plugin-vue": "^2.3.1",
     "@vue/eslint-config-prettier": "^7.0.0",
-    "babel-eslint": "^10.1.0",
     "eslint": "^7.32.0",
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-vue": "^8.7.1",
