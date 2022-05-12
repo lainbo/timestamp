@@ -9,25 +9,25 @@
     "lint": "eslint --fix --ext .js,.vue src"
   },
   "dependencies": {
-    "@vueuse/core": "^8.2.4",
-    "dayjs": "^1.11.1",
+    "@vueuse/core": "^8.4.2",
+    "dayjs": "^1.11.2",
     "vue": "^3.2.33",
     "vue3-clipboard": "^1.0.0"
   },
   "devDependencies": {
-    "@arco-design/web-vue": "^2.25.0",
-    "@vitejs/plugin-vue": "^2.3.1",
+    "@arco-design/web-vue": "^2.26.0",
+    "@vitejs/plugin-vue": "^2.3.3",
     "@vue/eslint-config-prettier": "^7.0.0",
     "eslint": "^7.32.0",
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-vue": "^8.7.1",
     "prettier": "^2.6.2",
-    "sass": "^1.50.1",
+    "sass": "^1.51.0",
     "unplugin-auto-import": "^0.7.1",
-    "unplugin-vue-components": "^0.19.3",
-    "vite": "^2.9.5",
+    "unplugin-vue-components": "^0.19.5",
+    "vite": "^2.9.9",
     "vite-plugin-chunk-split": "^0.2.2",
     "vite-plugin-windicss": "^1.8.4",
-    "windicss": "^3.5.1"
+    "windicss": "^3.5.3"
   }
 }
