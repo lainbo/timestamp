@@ -1,3 +1,15 @@
 .arco-popover-popup-content {
   width: 360px;
 }
+
+@font-face {
+  font-display: swap;
+  font-family: 'HarmonyOS';
+  src: url('../assets/font/HarmonyOS_Sans_Regular.ttf') format('woff2');
+}
+
+html,
+body {
+  font-family: 'HarmonyOS', 'HarmonyOS Sans SC', system-ui,
+    —apple-system, Segoe UI, Rototo, Helvetica, Arial, sans-serif !important;
+}

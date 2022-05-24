@@ -65,7 +65,7 @@
               <span
                 v-clipboard:copy="timeStampText"
                 v-clipboard:success="onCopy"
-                class="inline-block ml-16px cursor-pointer font-bold text-16px dark:text-white"
+                class="inline-block ml-16px cursor-pointer font-bold text-16px dynamic_timestamp dark:text-white"
               >
                 {{ timeStampText ?? '-' }}
               </span>
@@ -86,7 +86,7 @@
               <span
                 v-clipboard:copy="timeText"
                 v-clipboard:success="onCopy"
-                class="inline-block ml-16px cursor-pointer font-bold text-16px dark:text-white"
+                class="inline-block ml-16px cursor-pointer font-bold text-16px dynamic_timestamp dark:text-white"
               >
                 {{ timeText || '-' }}
               </span>
