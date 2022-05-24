@@ -51,7 +51,7 @@
 
       <div class="flex flex-col items-center justify-center">
         <a-form :model="formData" auto-label-width layout="vertical">
-          <a-form-item label="日期 → 时间戳：">
+          <a-form-item :label="`日期 → （${timeZoneText}）时间戳：`">
             <a-date-picker
               v-model="formData.date"
               :style="{ width: '345px' }"
@@ -74,7 +74,7 @@
 
           <a-divider />
 
-          <a-form-item :label="`时间戳 → 日期：(${timeZoneText})`">
+          <a-form-item :label="`时间戳 → （${timeZoneText}）日期`">
             <a-input
               ref="timeInputRef"
               v-model="formData.time"
