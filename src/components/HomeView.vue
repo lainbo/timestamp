@@ -67,7 +67,7 @@
                 v-clipboard:success="onCopy"
                 class="inline-block ml-16px cursor-pointer font-bold text-16px dark:text-white"
               >
-                {{ timeStampText || '-' }}
+                {{ timeStampText ?? '-' }}
               </span>
             </a-tooltip>
           </a-form-item>
@@ -174,7 +174,7 @@ const timeZoneText = computed(() => {
 })
 
 // 重置数据
-const resetData = () => {
+function resetData() {
   formData.date = ''
   formData.time = undefined
   timeType.value = 'ms'
@@ -183,7 +183,9 @@ const resetData = () => {
 }
 
 // 手动切换主题
-const changeTheme = val => setTheme(val)
+function changeTheme(val) {
+  setTheme(val)
+}
 
 const timeStamp = ref(0) // 底部动态时间戳
 const timeType = useStorage('defaultUnit', 'ms') // 单选框值，默认毫秒
@@ -193,10 +195,10 @@ const timeStampText = computed(() => {
   if (!formData?.date) return '-'
 
   // 毫秒下的时间戳字符串
-  const msText = dayjs(formData.date).tz(timeZone.value).valueOf()
+  const msText = dayjs(formData.date).tz(timeZone.value, true).valueOf()
 
   // 秒下的时间戳字符串
-  const sText = dayjs(formData.date).tz(timeZone.value).unix()
+  const sText = dayjs(formData.date).tz(timeZone.value, true).unix()
 
   return timeType.value === 'ms' ? msText : sText
 })
@@ -233,7 +235,7 @@ onMounted(() => {
 
 const btnIsStop = ref(false) // 按钮状态，是否停止
 // 开始/停止按钮
-const stopTimer = () => {
+function stopTimer() {
   if (!btnIsStop.value) {
     pause()
     btnIsStop.value = true
@@ -243,7 +245,7 @@ const stopTimer = () => {
   }
 }
 // 计算底部动态时间戳的值
-const calctimeStamp = () => {
+function calctimeStamp() {
   // 毫秒时间戳文字
   const msText = String(dayjs().tz(timeZone.value).valueOf())
     .substring(0, 10)
@@ -256,7 +258,7 @@ const calctimeStamp = () => {
 
 // 计算暂停时，底部动态时间戳的值
 // 因为是暂停的，所以不需要dayjs，切割字符串即可
-const calcStaticStamp = () => {
+function calcStaticStamp() {
   // 毫秒时间戳文字
   const msText = String(timeStamp.value).substring(0, 10).padEnd(13, '0')
 
@@ -281,13 +283,13 @@ const utoolsInit = () => {
 }
 
 // 切换单选，重新渲染底部动态时间戳的显示
-const changeRadio = val => {
+function changeRadio(val) {
   timeType.value = val
   btnIsStop.value ? calcStaticStamp() : calctimeStamp()
 }
 
 // 复制成功的提示
-const onCopy = () => {
+function onCopy() {
   Message.success({ content: '复制成功', duration: 1000 })
 }
 </script>
