@@ -5,11 +5,11 @@
 @font-face {
   font-display: swap;
   font-family: 'HarmonyOS';
-  src: url('../assets/font/HarmonyOS_Sans_Regular.ttf') format('woff2');
+  src: url('https://vkceyugu.cdn.bspapp.com/VKCEYUGU-44af3f84-786a-4383-9b43-d2bdfa949d80/1a6df99b-9137-4ca2-a792-8bf7c27ff0ff.woff2') format('woff2');
 }
 
 html,
 body {
-  font-family: 'HarmonyOS', 'HarmonyOS Sans SC', system-ui,
+  font-family: 'HarmonyOS Sans SC', 'HarmonyOS', system-ui,
     —apple-system, Segoe UI, Rototo, Helvetica, Arial, sans-serif !important;
 }
