@@ -1,6 +1,6 @@
 <template>
   <div
-    class="contain w-screen h-screen flex flex-col items-center pt-32px bg-white dark:bg-dark-300"
+    class="contain w-screen h-screen flex flex-col items-center py-32px bg-white dark:bg-dark-300"
   >
     <div
       class="card p-32px pt-16px rounded-8px shadow-xl w-11/12 min-w-500px dark:shadow-black dark:shadow-lg"
@@ -32,9 +32,9 @@
           </a-select>
           <span class="inline-block">
             <a-popover title="注意">
-              <icon-exclamation-circle
-                class="text-16px cursor-pointer dark:text-white"
-              />
+              <i
+                class="i-majesticons-exclamation-circle-line text-20px dark:text-white"
+              ></i>
               <template #content>
                 <p>
                   下列操作中，会根据对应国家是否执行夏令时自动进行转换，以转换结果为准，并不是普通的对时间进行加减
@@ -44,13 +44,22 @@
           </span>
         </div>
         <a-switch v-model="pageIsDark" type="round" @change="changeTheme">
-          <template #checked> 🌙 </template>
-          <template #unchecked> ☀️ </template>
+          <template #checked>
+            <i class="i-fxemoji-crescentmoon text-16px mb-4px"></i>
+          </template>
+          <template #unchecked>
+            <i class="i-twemoji-sun-with-face text-16px mb-4px"></i>
+          </template>
         </a-switch>
       </div>
 
-      <div class="flex flex-col items-center justify-center">
-        <a-form :model="formData" auto-label-width layout="vertical">
+      <div class="flex-c flex-col">
+        <a-form
+          :model="formData"
+          auto-label-width
+          layout="vertical"
+          size="large"
+        >
           <a-form-item :label="`日期 → （${timeZoneText}）时间戳：`">
             <a-date-picker
               v-model="formData.date"
@@ -103,7 +112,7 @@
                     <span
                       v-clipboard:copy="timeStamp"
                       v-clipboard:success="onCopy"
-                      class="cursor-pointer transition-all dynamic_timestamp inline-block dark:text-white"
+                      class="dynamic_timestamp cursor-pointer transition-all inline-block dark:text-white"
                       :class="{
                         'text-blue-600 font-bold text-16px dark:text-white':
                           btnIsStop
@@ -120,8 +129,11 @@
                   @click="stopTimer"
                 >
                   <template #icon>
-                    <icon-play-arrow-fill v-if="btnIsStop" />
-                    <icon-pause v-else />
+                    <i
+                      :class="[
+                        btnIsStop ? 'i-ri-play-fill' : 'i-ic-twotone-pause'
+                      ]"
+                    ></i>
                   </template>
                   <template #default>
                     {{ btnIsStop ? '继续' : '暂停' }}
@@ -137,7 +149,7 @@
                 >
                   <a-button size="small">
                     <template #icon>
-                      <icon-refresh />
+                      <i class="i-material-symbols-refresh-rounded"></i>
                     </template>
                     <template #default> 重置数据 </template>
                   </a-button>
@@ -156,12 +168,6 @@ import dayjs from 'dayjs'
 import { setTheme, pageIsDark } from '@/utils/theme.js'
 import { TimezoneData } from '@/assets/timezone/TimezoneData.js'
 import { Message } from '@arco-design/web-vue'
-import {
-  IconPause,
-  IconPlayArrowFill,
-  IconExclamationCircle,
-  IconRefresh
-} from '@arco-design/web-vue/es/icon'
 
 const timeZone = useStorage('defaultTimeZone', 'Asia/Shanghai') // 默认时区
 const timezoneData = ref(TimezoneData) // 时区数据

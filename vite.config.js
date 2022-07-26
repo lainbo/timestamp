@@ -2,16 +2,26 @@ import { defineConfig } from 'vite'
 import { resolve } from 'path'
 import { ArcoResolver } from 'unplugin-vue-components/resolvers'
 import { chunkSplitPlugin } from 'vite-plugin-chunk-split'
-import WindiCSS from 'vite-plugin-windicss'
+import UnoCSS from 'unocss/vite'
 import vue from '@vitejs/plugin-vue'
 import Components from 'unplugin-vue-components/vite'
 import AutoImport from 'unplugin-auto-import/vite'
 
 export default defineConfig({
   base: './',
+  css: {
+    preprocessorOptions: {
+      less: {
+        modifyVars: {
+          'arcoblue-6': '#646cff'
+        },
+        javascriptEnabled: true
+      }
+    }
+  },
   plugins: [
     vue(),
-    WindiCSS(),
+    UnoCSS(),
     AutoImport({
       eslintrc: {
         enabled: true,
