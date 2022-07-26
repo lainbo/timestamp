@@ -1,6 +1,6 @@
 <template>
   <div
-    class="contain w-screen h-screen flex flex-col items-center py-32px bg-white dark:bg-dark-300"
+    class="contain w-screen h-screen flex flex-col items-center py-16px bg-white dark:bg-dark-300"
   >
     <div
       class="card p-32px pt-16px rounded-8px shadow-xl w-11/12 min-w-500px dark:shadow-black dark:shadow-lg"
