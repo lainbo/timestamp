@@ -8,20 +8,41 @@
   "features": [
     {
       "code": "time",
+      "label": "时间戳日期转换",
       "explain": "帮助您 日期 和 时间戳 相互转换的工具",
       "cmds": [
         "timeStamp",
         "时间戳",
-        "sjc",
+        "sjc"
+      ]
+    },
+    {
+      "code": "timeStamp",
+      "explain": "将从 时间戳 转 日期文字",
+      "cmds": [
         {
           "type": "regex",
-          "label": "查询时间戳",
+          "label": "转换为日期",
           "match": "/^[0-9]{9,13}$/i",
           "minLength": 9,
           "maxLength": 13
         }
       ]
+    },
+    {
+      "code": "date",
+      "explain": "将从 日期文字 转 时间戳",
+      "cmds": [
+        {
+          "type": "regex",
+          "label": "转换为时间戳",
+          "match": "/^\\d{4}([/:-\\S])(1[0-2]|0?[1-9])\\1(0?[1-9]|[1-2]\\d|30|31) (?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d$/"
+        }
+      ]
     }
   ],
-  "name": "ae3ee9f3"
+  "name": "ae3ee9f3",
+  "development": {
+    "main": "http://127.0.0.1:1234"
+  }
 }

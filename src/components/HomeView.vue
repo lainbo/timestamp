@@ -1,9 +1,9 @@
 <template>
   <div
-    class="contain w-screen h-screen flex flex-col items-center py-16px bg-white dark:bg-dark-300"
+    class="contain w-screen h-screen flex flex-col items-center pt-8px bg-white dark:bg-dark-300"
   >
     <div
-      class="card p-32px pt-16px rounded-8px shadow-xl w-11/12 min-w-500px dark:shadow-black dark:shadow-lg"
+      class="card p-32px pt-16px rounded-8px shadow-xl w-11/12 min-w-600px dark:shadow-black dark:shadow-lg"
     >
       <div class="mb-16px flex justify-between items-center">
         <div class="space-x-11px">
@@ -52,6 +52,7 @@
           </template>
         </a-switch>
       </div>
+      <a-divider></a-divider>
 
       <div class="flex-c flex-col">
         <a-form
@@ -274,12 +275,15 @@ function calcStaticStamp() {
 const { pause, resume } = useRafFn(calctimeStamp)
 
 // utools数据初始化
-const timeInputRef = ref(null) // 文本输入框的dom
+const timeInputRef = ref() // 文本输入框的dom
 const utoolsInit = () => {
-  window.utools.onPluginEnter(({ type, payload }) => {
-    if (type === 'regex' && !!payload) {
-      formData.time = parseInt(payload) || 0
+  window.utools.onPluginEnter(({ code, payload }) => {
+    if (code === 'timeStamp') {
+      formData.time = payload || 0
       timeInputRef.value.focus()
+    }
+    if (code === 'date') {
+      formData.date = dayjs(payload).format('YYYY-MM-DD HH:mm:ss')
     }
   })
   window.utools.subInputBlur()
@@ -299,11 +303,9 @@ async function onCopy(str = '') {
 </script>
 
 <style lang="scss" scoped>
-.contain {
-  transition: all 0.4s ease;
-  .card {
-    transition: all 0.4s ease;
-  }
+.contain,
+.card {
+  @apply transition-all duration-400;
 }
 .dynamic_timestamp {
   // 等宽数字

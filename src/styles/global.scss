@@ -22,3 +22,10 @@ body[arco-theme='dark'] {
 .arco-message {
   border-radius: 8px;
 }
+
+.arco-divider-horizontal {
+  @apply my-16px;
+}
+.arco-form-size-large .arco-form-item-label-col {
+  @apply leading-28px;
+}
