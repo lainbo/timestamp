@@ -72,9 +72,8 @@
             />
             <a-tooltip content="点击复制" position="top" mini>
               <span
-                v-clipboard:copy="timeStampText"
-                v-clipboard:success="onCopy"
                 class="inline-block ml-16px cursor-pointer font-bold text-16px dynamic_timestamp dark:text-white"
+                @click="onCopy(timeStampText)"
               >
                 {{ timeStampText ?? '-' }}
               </span>
@@ -93,9 +92,8 @@
             />
             <a-tooltip content="点击复制" position="top" mini>
               <span
-                v-clipboard:copy="timeText"
-                v-clipboard:success="onCopy"
                 class="inline-block ml-16px cursor-pointer font-bold text-16px dynamic_timestamp dark:text-white"
+                @click="onCopy(timeText)"
               >
                 {{ timeText || '-' }}
               </span>
@@ -110,13 +108,12 @@
                 <div class="w-135px">
                   <a-tooltip content="点击复制" position="bottom" mini>
                     <span
-                      v-clipboard:copy="timeStamp"
-                      v-clipboard:success="onCopy"
                       class="dynamic_timestamp cursor-pointer transition-all inline-block dark:text-white"
                       :class="{
                         'text-blue-600 font-bold text-16px dark:text-white':
                           btnIsStop
                       }"
+                      @click="onCopy(timeStamp)"
                     >
                       {{ timeStamp }}
                     </span>
@@ -293,9 +290,10 @@ function changeRadio(val) {
   timeType.value = val
   btnIsStop.value ? calcStaticStamp() : calctimeStamp()
 }
-
+const { copy } = useClipboard()
 // 复制成功的提示
-function onCopy() {
+async function onCopy(str = '') {
+  await copy(str)
   Message.success({ content: '复制成功', duration: 1000 })
 }
 </script>
