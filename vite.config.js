@@ -37,7 +37,7 @@ export default defineConfig({
       strategy: 'default',
       customSplitting: {
         customize: [/src\/utils/, /src\/assets/],
-        'component-library': ['@arco-design/web-vue']
+        arco: ['@arco-design/web-vue']
       }
     })
   ],

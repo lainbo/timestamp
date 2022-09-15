@@ -8,16 +8,16 @@
       <div class="mb-16px flex justify-between items-center">
         <div class="space-x-11px">
           <a-radio-group
-            v-model="timeType"
+            v-model="时间戳类型"
             type="button"
             size="large"
-            @change="changeRadio"
+            @change="radio切换($event)"
           >
             <a-radio value="ms"> 毫秒 </a-radio>
             <a-radio value="s"> 秒 </a-radio>
           </a-radio-group>
           <a-select
-            v-model:model-value="timeZone"
+            v-model:model-value="时区"
             size="large"
             :style="{ width: '235px' }"
             placeholder="请选择时区"
@@ -43,7 +43,7 @@
             </a-popover>
           </span>
         </div>
-        <a-switch v-model="pageIsDark" type="round" @change="changeTheme">
+        <a-switch v-model="pageIsDark" type="round" @change="变更主题($event)">
           <template #checked>
             <i class="i-fxemoji-crescentmoon text-16px mb-4px"></i>
           </template>
@@ -61,7 +61,7 @@
           layout="vertical"
           size="large"
         >
-          <a-form-item :label="`日期 → （${timeZoneText}）时间戳：`">
+          <a-form-item :label="`日期 → （${时区文字}）时间戳：`">
             <a-date-picker
               v-model="formData.date"
               :style="{ width: '345px' }"
@@ -74,7 +74,7 @@
             <a-tooltip content="点击复制" position="top" mini>
               <span
                 class="inline-block ml-16px cursor-pointer font-bold text-16px dynamic_timestamp dark:text-white"
-                @click="onCopy(timeStampText)"
+                @click="复制(timeStampText)"
               >
                 {{ timeStampText ?? '-' }}
               </span>
@@ -83,7 +83,7 @@
 
           <a-divider />
 
-          <a-form-item :label="`时间戳 → （${timeZoneText}）日期`">
+          <a-form-item :label="`时间戳 → （${时区文字}）日期`">
             <a-input
               ref="timeInputRef"
               v-model="formData.time"
@@ -94,7 +94,7 @@
             <a-tooltip content="点击复制" position="top" mini>
               <span
                 class="inline-block ml-16px cursor-pointer font-bold text-16px dynamic_timestamp dark:text-white"
-                @click="onCopy(timeText)"
+                @click="复制(timeText)"
               >
                 {{ timeText || '-' }}
               </span>
@@ -103,7 +103,9 @@
 
           <a-divider />
 
-          <a-form-item :label="`当前时间戳${btnIsStop ? '（已暂停）' : ''}：`">
+          <a-form-item
+            :label="`当前时间戳${按钮停止状态 ? '（已暂停）' : ''}：`"
+          >
             <div class="flex justify-between flex-1">
               <div class="space-x-8px flex items-center">
                 <div class="w-135px">
@@ -112,29 +114,29 @@
                       class="dynamic_timestamp cursor-pointer transition-all inline-block dark:text-white"
                       :class="{
                         'text-blue-600 font-bold text-16px dark:text-white':
-                          btnIsStop
+                          按钮停止状态
                       }"
-                      @click="onCopy(timeStamp)"
+                      @click="复制(底部动态时间戳)"
                     >
-                      {{ timeStamp }}
+                      {{ 底部动态时间戳 }}
                     </span>
                   </a-tooltip>
                 </div>
 
                 <a-button
                   type="text"
-                  :status="btnIsStop ? 'success' : 'danger'"
-                  @click="stopTimer"
+                  :status="按钮停止状态 ? 'success' : 'danger'"
+                  @click="暂停开始按钮()"
                 >
                   <template #icon>
                     <i
                       :class="[
-                        btnIsStop ? 'i-ri-play-fill' : 'i-ic-twotone-pause'
+                        按钮停止状态 ? 'i-ri-play-fill' : 'i-ic-twotone-pause'
                       ]"
                     ></i>
                   </template>
                   <template #default>
-                    {{ btnIsStop ? '继续' : '暂停' }}
+                    {{ 按钮停止状态 ? '继续' : '暂停' }}
                   </template>
                 </a-button>
               </div>
@@ -143,7 +145,7 @@
                   content-class="w-250px"
                   content="时间戳的单位、时区、页面数据将恢复为初始值，确定吗？"
                   position="tr"
-                  @ok="resetData"
+                  @ok="重置数据()"
                 >
                   <a-button size="small">
                     <template #icon>
@@ -164,47 +166,43 @@
 <script setup>
 import dayjs from 'dayjs'
 import { setTheme, pageIsDark } from '@/utils/theme.js'
-import { TimezoneData } from '@/assets/timezone/TimezoneData.js'
+import TimezoneJson from '@/assets/timezone/TimezoneData.json'
 import { Message } from '@arco-design/web-vue'
 
-const timeZone = useStorage('defaultTimeZone', 'Asia/Shanghai') // 默认时区
-const timezoneData = ref(TimezoneData) // 时区数据
+const 时区 = useStorage('defaultTimeZone', 'Asia/Shanghai') // 默认时区
+const timezoneData = ref(TimezoneJson) // 时区数据
 
-// 返回对应时区文字
-const timeZoneText = computed(() => {
-  return TimezoneData.find(
-    item => item.value === timeZone.value
-  ).code?.substring(12)
+const 时区文字 = computed(() => {
+  return TimezoneJson.find(item => item.value === 时区.value).code?.substring(
+    12
+  )
 })
 
-// 重置数据
-function resetData() {
+function 重置数据() {
   formData.date = ''
   formData.time = undefined
-  timeType.value = 'ms'
-  timeZone.value = 'Asia/Shanghai'
+  时间戳类型.value = 'ms'
+  时区.value = 'Asia/Shanghai'
   Message.success({ content: '已重置', duration: 1000 })
 }
 
 // 手动切换主题
-function changeTheme(val) {
+function 变更主题(val) {
   setTheme(val)
 }
 
-const timeStamp = ref(0) // 底部动态时间戳
-const timeType = useStorage('defaultUnit', 'ms') // 单选框值，默认毫秒
+const 底部动态时间戳 = ref(0)
+const 时间戳类型 = useStorage('defaultUnit', 'ms') // 单选框值，默认毫秒
 
 // 日期 → 时间戳后面的文字
 const timeStampText = computed(() => {
   if (!formData?.date) return '-'
 
-  // 毫秒下的时间戳字符串
-  const msText = dayjs(formData.date).tz(timeZone.value, true).valueOf()
+  const 毫秒文字 = dayjs(formData.date).tz(时区.value, true).valueOf()
 
-  // 秒下的时间戳字符串
-  const sText = dayjs(formData.date).tz(timeZone.value, true).unix()
+  const 秒文字 = dayjs(formData.date).tz(时区.value, true).unix()
 
-  return timeType.value === 'ms' ? msText : sText
+  return 时间戳类型.value === 'ms' ? 毫秒文字 : 秒文字
 })
 
 // 时间戳 → 日期后面的文字
@@ -213,17 +211,15 @@ const timeText = computed(() => {
   if (isNaN(time)) return '-'
 
   // 毫秒单位的日期字符串
-  const msDateText = dayjs(time)
-    .tz(timeZone.value)
-    .format('YYYY-MM-DD HH:mm:ss')
+  const 毫秒日期文字 = dayjs(time).tz(时区.value).format('YYYY-MM-DD HH:mm:ss')
 
   // 秒单位的日期字符串
-  const sDateText = dayjs
+  const 秒日期文字 = dayjs
     .unix(time)
-    .tz(timeZone.value)
+    .tz(时区.value)
     .format('YYYY-MM-DD HH:mm:ss')
 
-  return timeType.value === 'ms' ? msDateText : sDateText
+  return 时间戳类型.value === 'ms' ? 毫秒日期文字 : 秒日期文字
 })
 
 // 两个输入框
@@ -237,42 +233,37 @@ onMounted(() => {
   utoolsInit()
 })
 
-const btnIsStop = ref(false) // 按钮状态，是否停止
+const 按钮停止状态 = ref(false) // 按钮状态，是否停止
 // 开始/停止按钮
-function stopTimer() {
-  if (!btnIsStop.value) {
+function 暂停开始按钮() {
+  if (!按钮停止状态.value) {
     pause()
-    btnIsStop.value = true
+    按钮停止状态.value = true
   } else {
     resume()
-    btnIsStop.value = false
+    按钮停止状态.value = false
   }
 }
 // 计算底部动态时间戳的值
-function calctimeStamp() {
-  // 毫秒时间戳文字
-  const msText = String(dayjs().tz(timeZone.value).valueOf())
+function 计算动态时间戳文字() {
+  const 毫秒文字 = String(dayjs().tz(时区.value).valueOf())
     .substring(0, 10)
     .padEnd(13, '0')
 
-  // 秒时间戳文字
-  const sText = String(dayjs().tz(timeZone.value).unix())
-  timeStamp.value = timeType.value === 'ms' ? msText : sText
+  const 秒文字 = String(dayjs().tz(时区.value).unix())
+  底部动态时间戳.value = 时间戳类型.value === 'ms' ? 毫秒文字 : 秒文字
 }
 
 // 计算暂停时，底部动态时间戳的值
 // 因为是暂停的，所以不需要dayjs，切割字符串即可
-function calcStaticStamp() {
-  // 毫秒时间戳文字
-  const msText = String(timeStamp.value).substring(0, 10).padEnd(13, '0')
-
-  // 秒时间戳文字
-  const sText = String(timeStamp.value).substring(0, 10)
-  timeStamp.value = timeType.value === 'ms' ? msText : sText
+function 计算静态时间戳文字() {
+  const 毫秒文字 = String(底部动态时间戳.value).substring(0, 10).padEnd(13, '0')
+  const 秒文字 = String(底部动态时间戳.value).substring(0, 10)
+  底部动态时间戳.value = 时间戳类型.value === 'ms' ? 毫秒文字 : 秒文字
 }
 
 // 页面自动初始化
-const { pause, resume } = useRafFn(calctimeStamp)
+const { pause, resume } = useRafFn(计算动态时间戳文字)
 
 // utools数据初始化
 const timeInputRef = ref() // 文本输入框的dom
@@ -290,13 +281,13 @@ const utoolsInit = () => {
 }
 
 // 切换单选，重新渲染底部动态时间戳的显示
-function changeRadio(val) {
-  timeType.value = val
-  btnIsStop.value ? calcStaticStamp() : calctimeStamp()
+function radio切换(val) {
+  时间戳类型.value = val
+  按钮停止状态.value ? 计算静态时间戳文字() : 计算动态时间戳文字()
 }
 const { copy } = useClipboard()
 // 复制成功的提示
-async function onCopy(str = '') {
+async function 复制(str = '') {
   await copy(str)
   Message.success({ content: '复制成功', duration: 1000 })
 }
@@ -305,7 +296,7 @@ async function onCopy(str = '') {
 <style lang="scss" scoped>
 .contain,
 .card {
-  @apply transition-all duration-400;
+  transition: all 0.4s ease;
 }
 .dynamic_timestamp {
   // 等宽数字

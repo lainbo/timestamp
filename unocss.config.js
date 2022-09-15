@@ -2,26 +2,19 @@ import {
   defineConfig,
   presetAttributify,
   presetIcons,
-  presetUno,
+  presetWind,
   transformerDirectives,
   transformerVariantGroup
 } from 'unocss'
-import presetRemToPx from '@unocss/preset-rem-to-px'
 export default defineConfig({
   shortcuts: [
     {
-      'flex-c': 'flex items-center justify-center',
-      'grid-c': 'grid place-items-center',
-      'absolute-x-center': 'absolute left-1/2 -translate-x-1/2',
-      'absolute-y-center': 'absolute top-1/2 -translate-y-1/2',
-      'absolute-center':
-        'absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2'
+      'flex-c': 'flex items-center justify-center'
     }
   ],
   presets: [
-    presetUno(),
+    presetWind(),
     presetAttributify(),
-    presetRemToPx(),
     presetIcons({
       warn: true,
       extraProperties: {
