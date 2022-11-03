@@ -43,6 +43,6 @@
   ],
   "name": "ae3ee9f3",
   "development": {
-    "main": "http://127.0.0.1:1234"
+    "main": "http://localhost:1234/"
   }
 }

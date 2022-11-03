@@ -1,9 +1,9 @@
 <template>
   <div
-    class="contain w-screen h-screen flex flex-col items-center pt-8px bg-white dark:bg-dark-300"
+    class="contain w-screen h-screen flex flex-col items-center pt-8px bg-white dark:bg-#303133"
   >
     <div
-      class="card p-32px pt-16px rounded-8px shadow-xl w-11/12 min-w-600px dark:shadow-black dark:shadow-lg"
+      class="card p-32px pt-16px rounded-8px shadow-xl w-11/12 min-w-600px dark:shadow-#222 dark:shadow-lg"
     >
       <div class="mb-16px flex justify-between items-center">
         <div class="space-x-11px">
@@ -265,10 +265,11 @@ function 计算静态时间戳文字() {
 // 页面自动初始化
 const { pause, resume } = useRafFn(计算动态时间戳文字)
 
+const utools = window?.utools
 // utools数据初始化
 const timeInputRef = ref() // 文本输入框的dom
 const utoolsInit = () => {
-  window.utools.onPluginEnter(({ code, payload }) => {
+  utools.onPluginEnter(({ code, payload }) => {
     if (code === 'timeStamp') {
       formData.time = payload || 0
       timeInputRef.value.focus()
@@ -277,11 +278,15 @@ const utoolsInit = () => {
       formData.date = dayjs(payload).format('YYYY-MM-DD HH:mm:ss')
     }
   })
-  window.utools.subInputBlur()
+  utools.subInputBlur()
+  时间戳类型.value = utools.dbStorage.getItem('defaultUnit') || 'ms'
 }
 
 // 切换单选，重新渲染底部动态时间戳的显示
 function radio切换(val) {
+  if (utools) {
+    utools.dbStorage.setItem('defaultUnit', val)
+  }
   时间戳类型.value = val
   按钮停止状态.value ? 计算静态时间戳文字() : 计算动态时间戳文字()
 }
