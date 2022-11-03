@@ -282,11 +282,17 @@ const utoolsInit = () => {
   时间戳类型.value = utools.dbStorage.getItem('defaultUnit') || 'ms'
 }
 
+watch(
+  () => 时间戳类型.value,
+  val => {
+    if (utools) {
+      utools.dbStorage.setItem('defaultUnit', val)
+    }
+  }
+)
+
 // 切换单选，重新渲染底部动态时间戳的显示
 function radio切换(val) {
-  if (utools) {
-    utools.dbStorage.setItem('defaultUnit', val)
-  }
   时间戳类型.value = val
   按钮停止状态.value ? 计算静态时间戳文字() : 计算动态时间戳文字()
 }
