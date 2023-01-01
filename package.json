@@ -12,17 +12,17 @@
     "up": "taze major -I"
   },
   "dependencies": {
-    "@vueuse/core": "^9.8.2",
+    "@vueuse/core": "^9.9.0",
     "dayjs": "^1.11.7",
     "vue": "^3.2.45"
   },
   "devDependencies": {
-    "@arco-design/web-vue": "^2.40.0",
-    "@iconify/json": "^2.1.155",
+    "@arco-design/web-vue": "^2.41.0",
+    "@iconify/json": "^2.1.159",
     "@unocss/reset": "^0.48.0",
     "@vitejs/plugin-vue": "^3.2.0",
     "@vue/eslint-config-prettier": "^7.0.0",
-    "eslint": "^8.30.0",
+    "eslint": "^8.31.0",
     "eslint-plugin-prettier": "^4.2.1",
     "eslint-plugin-vue": "^9.8.0",
     "less": "^4.1.3",
