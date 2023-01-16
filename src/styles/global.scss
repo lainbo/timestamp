@@ -29,3 +29,11 @@ body[arco-theme="dark"] {
 .arco-form-size-large .arco-form-item-label-col {
   @apply leading-28px;
 }
+
+.dark ::selection {
+  background-color: #686868;
+}
+::selection {
+  background-color: #5b61ff;
+  color: #fff;
+}
