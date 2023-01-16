@@ -1,7 +1,6 @@
 import { defineConfig } from 'vite'
 import { resolve } from 'path'
 import { ArcoResolver } from 'unplugin-vue-components/resolvers'
-import { chunkSplitPlugin } from 'vite-plugin-chunk-split'
 import UnoCSS from 'unocss/vite'
 import vue from '@vitejs/plugin-vue'
 import Components from 'unplugin-vue-components/vite'
@@ -33,14 +32,6 @@ export default defineConfig({
     Components({
       resolvers: [ArcoResolver()]
     }),
-    chunkSplitPlugin({
-      strategy: 'default',
-      customSplitting: {
-        customize: [/src\/utils/, /src\/assets/],
-        arco: ['@arco-design/web-vue'],
-        vue: ['vue', '@vueuse/core']
-      }
-    })
   ],
   resolve: {
     alias: {
@@ -57,6 +48,17 @@ export default defineConfig({
         drop_console: true,
         drop_debugger: true
       }
-    }
+    },
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          dep: [
+            'vue',
+            '@vueuse/core',
+          ],
+          arco: ['@arco-design/web-vue'],
+        },
+      },
+    },
   }
 })
