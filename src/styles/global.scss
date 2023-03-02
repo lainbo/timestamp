@@ -1,18 +1,14 @@
-.arco-popover-popup-content {
-  width: 360px;
-}
-
-@font-face {
-  font-display: swap;
-  font-family: "HarmonyOS";
-  src: url("https://efadmin.netlify.app/font/HarmonyOS_Sans_Regular.woff2")
-    format("woff2");
-}
+/*
+  中文
+  鸿蒙的regular字重https://s1.hdslb.com/bfs/static/jinkela/long/font/regular.css
+  鸿蒙的medium字重https://s1.hdslb.com/bfs/static/jinkela/long/font/medium.css
+*/
+@import url('https://s1.hdslb.com/bfs/static/jinkela/long/font/medium.css');
 
 html,
 body {
-  font-family: "HarmonyOS Sans SC", "HarmonyOS", system-ui, —apple-system,
-    Segoe UI, Rototo, Helvetica, Arial, sans-serif !important;
+  font-family: 'HarmonyOS Sans SC Medium', 'HarmonyOS_Medium', system-ui, —apple-system,
+  Segoe UI, Rototo, Helvetica, Arial, sans-serif !important;
 }
 
 body[arco-theme="dark"] {
@@ -36,4 +32,8 @@ body[arco-theme="dark"] {
 ::selection {
   background-color: #5b61ff;
   color: #fff;
+}
+
+.arco-popover-popup-content {
+  width: 360px;
 }
