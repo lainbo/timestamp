@@ -107,13 +107,13 @@
             :label="`当前时间戳${按钮停止状态 ? '（已暂停）' : ''}：`"
           >
             <div class="flex justify-between flex-1">
-              <div class="space-x-8px flex items-center">
-                <div class="w-135px">
+              <div class="space-x-12px flex items-center">
+                <div class="w-165px">
                   <a-tooltip content="点击复制" position="bottom" mini>
                     <span
-                      class="dynamic_timestamp cursor-pointer transition-all inline-block dark:text-white"
+                      class="dynamic_timestamp cursor-pointer transition-all text-16px inline-block dark:text-white"
                       :class="{
-                        'text-blue-600 font-bold text-16px dark:text-white':
+                        'text-blue-600 font-bold text-18px dark:text-white':
                           按钮停止状态
                       }"
                       @click="复制(底部动态时间戳)"

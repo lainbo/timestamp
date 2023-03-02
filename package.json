@@ -19,6 +19,7 @@
   "devDependencies": {
     "@arco-design/web-vue": "^2.43.2",
     "@iconify/json": "^2.2.29",
+    "@unocss/preset-web-fonts": "^0.50.3",
     "@unocss/reset": "^0.50.3",
     "@vitejs/plugin-vue": "^4.0.0",
     "@vue/eslint-config-prettier": "^7.1.0",
