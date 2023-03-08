@@ -1,17 +1,12 @@
-/*
-  中文
-  鸿蒙的regular字重https://s1.hdslb.com/bfs/static/jinkela/long/font/regular.css
-  鸿蒙的medium字重https://s1.hdslb.com/bfs/static/jinkela/long/font/medium.css
-*/
-@import url('https://s1.hdslb.com/bfs/static/jinkela/long/font/medium.css');
+@import url('https://fast-naptime.netlify.app/font/HarmonyOS_Font_Medium/medium.css');
 
 html,
 body {
-  font-family: 'Inter','HarmonyOS Sans SC Medium', 'HarmonyOS_Medium', system-ui, —apple-system,
-  Segoe UI, Rototo, Helvetica, Arial, sans-serif !important;
+  font-family: 'Inter', 'HarmonyOS Sans SC Medium', 'HarmonyOS_Medium',
+    system-ui, —apple-system, Segoe UI, Rototo, Helvetica, Arial, sans-serif !important;
 }
 
-body[arco-theme="dark"] {
+body[arco-theme='dark'] {
   --arcoblue-6: 100, 108, 255;
 }
 
