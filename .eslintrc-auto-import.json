@@ -266,6 +266,16 @@
     "watchThrottled": true,
     "watchTriggerable": true,
     "watchWithFilter": true,
-    "whenever": true
+    "whenever": true,
+    "createReusableTemplate": true,
+    "createTemplatePromise": true,
+    "toValue": true,
+    "useAnimate": true,
+    "useArrayDifference": true,
+    "useArrayIncludes": true,
+    "useParentElement": true,
+    "usePerformanceObserver": true,
+    "watchDeep": true,
+    "watchImmediate": true
   }
 }
