@@ -13,6 +13,7 @@
             size="large"
             @change="radio切换($event)"
           >
+            <a-radio value="ns"> 纳秒 </a-radio>
             <a-radio value="ms"> 毫秒 </a-radio>
             <a-radio value="s"> 秒 </a-radio>
           </a-radio-group>
@@ -108,7 +109,7 @@
           >
             <div class="flex justify-between flex-1">
               <div class="space-x-12px flex items-center">
-                <div class="w-165px">
+                <div class="w-235px">
                   <a-tooltip content="点击复制" position="bottom" mini>
                     <span
                       class="dynamic_timestamp cursor-pointer transition-all text-16px inline-block dark:text-white"
@@ -199,10 +200,12 @@ const timeStampText = computed(() => {
   if (!formData?.date) return '-'
 
   const 毫秒文字 = dayjs(formData.date).tz(时区.value, true).valueOf()
-
   const 秒文字 = dayjs(formData.date).tz(时区.value, true).unix()
+  const 纳秒文字 = dayjs(formData.date).tz(时区.value, true).valueOf() * 1000000
 
-  return 时间戳类型.value === 'ms' ? 毫秒文字 : 秒文字
+  if (时间戳类型.value === 'ms') return 毫秒文字
+  if (时间戳类型.value === 's') return 秒文字
+  return 纳秒文字
 })
 
 // 时间戳 → 日期后面的文字
@@ -210,16 +213,18 @@ const timeText = computed(() => {
   const time = parseInt(formData.time)
   if (isNaN(time)) return '-'
 
-  // 毫秒单位的日期字符串
   const 毫秒日期文字 = dayjs(time).tz(时区.value).format('YYYY-MM-DD HH:mm:ss')
-
-  // 秒单位的日期字符串
   const 秒日期文字 = dayjs
     .unix(time)
     .tz(时区.value)
     .format('YYYY-MM-DD HH:mm:ss')
+  const 纳秒日期文字 = dayjs(time / 1000000)
+    .tz(时区.value)
+    .format('YYYY-MM-DD HH:mm:ss')
 
-  return 时间戳类型.value === 'ms' ? 毫秒日期文字 : 秒日期文字
+  if (时间戳类型.value === 'ms') return 毫秒日期文字
+  if (时间戳类型.value === 's') return 秒日期文字
+  return 纳秒日期文字
 })
 
 // 两个输入框
@@ -246,12 +251,17 @@ function 暂停开始按钮() {
 }
 // 计算底部动态时间戳的值
 function 计算动态时间戳文字() {
-  const 毫秒文字 = String(dayjs().tz(时区.value).valueOf())
-    .substring(0, 10)
-    .padEnd(13, '0')
+  const 当前毫秒 = dayjs().tz(时区.value).valueOf()
+  const 当前秒 = dayjs().tz(时区.value).unix()
+  const 当前纳秒 = 当前毫秒 * 1000000
 
-  const 秒文字 = String(dayjs().tz(时区.value).unix())
-  底部动态时间戳.value = 时间戳类型.value === 'ms' ? 毫秒文字 : 秒文字
+  const 毫秒文字 = String(当前毫秒).substring(0, 10).padEnd(13, '0')
+  const 秒文字 = String(当前秒)
+  const 纳秒文字 = String(当前纳秒).substring(0, 10).padEnd(19, '0')
+
+  if (时间戳类型.value === 'ms') 底部动态时间戳.value = 毫秒文字
+  else if (时间戳类型.value === 's') 底部动态时间戳.value = 秒文字
+  else 底部动态时间戳.value = 纳秒文字
 }
 
 // 计算暂停时，底部动态时间戳的值
@@ -259,7 +269,11 @@ function 计算动态时间戳文字() {
 function 计算静态时间戳文字() {
   const 毫秒文字 = String(底部动态时间戳.value).substring(0, 10).padEnd(13, '0')
   const 秒文字 = String(底部动态时间戳.value).substring(0, 10)
-  底部动态时间戳.value = 时间戳类型.value === 'ms' ? 毫秒文字 : 秒文字
+  const 纳秒文字 = String(底部动态时间戳.value).substring(0, 19)
+
+  if (时间戳类型.value === 'ms') 底部动态时间戳.value = 毫秒文字
+  else if (时间戳类型.value === 's') 底部动态时间戳.value = 秒文字
+  else 底部动态时间戳.value = 纳秒文字
 }
 
 // 页面自动初始化
