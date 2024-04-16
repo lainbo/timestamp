@@ -72,7 +72,11 @@
               }"
               format="YYYY-MM-DD HH:mm:ss"
             />
-            <a-tooltip content="点击复制" position="top" mini>
+            <a-tooltip
+              :content="`点击复制 / ${timeStampShortcut}`"
+              position="top"
+              mini
+            >
               <span
                 class="inline-block ml-16px cursor-pointer font-bold text-16px dynamic_timestamp dark:text-white"
                 @click="复制(timeStampText)"
@@ -92,7 +96,11 @@
               allow-clear
               :style="{ width: '345px' }"
             />
-            <a-tooltip content="点击复制" position="top" mini>
+            <a-tooltip
+              :content="`点击复制 / ${timeTextShortcut}`"
+              position="top"
+              mini
+            >
               <span
                 class="inline-block ml-16px cursor-pointer font-bold text-16px dynamic_timestamp dark:text-white"
                 @click="复制(timeText)"
@@ -110,7 +118,11 @@
             <div class="flex justify-between flex-1">
               <div class="space-x-12px flex items-center">
                 <div class="w-235px">
-                  <a-tooltip content="点击复制" position="bottom" mini>
+                  <a-tooltip
+                    :content="`点击复制 / ${dynamicTimeStampShortcut}`"
+                    position="bottom"
+                    mini
+                  >
                     <span
                       class="dynamic_timestamp cursor-pointer transition-all text-16px inline-block dark:text-white"
                       :class="{
@@ -169,6 +181,71 @@ import dayjs from 'dayjs'
 import { setTheme, pageIsDark } from '@/utils/theme.js'
 import TimezoneJson from '@/assets/timezone/TimezoneData.json'
 import { Message } from '@arco-design/web-vue'
+const utools = window?.utools
+const keys = useMagicKeys()
+const isMacOs = utools?.isMacOs() || false
+
+// 定义快捷键，内部使用 'Meta'，外部展示 'Command'
+const keyMappings = {
+  timeStamp: {
+    mac: 'Meta+Shift+Z',
+    other: 'Ctrl+Shift+Z'
+  },
+  timeText: {
+    mac: 'Meta+Shift+X',
+    other: 'Ctrl+Shift+X'
+  },
+  dynamicTimeStamp: {
+    mac: 'Meta+Shift+C',
+    other: 'Ctrl+Shift+C'
+  }
+}
+
+// 显示给用户的快捷键，Mac 上使用 'Command' 替代 'Meta'
+const displayKeyMappings = {
+  timeStamp: {
+    mac: 'Command+Shift+Z',
+    other: 'Ctrl+Shift+Z'
+  },
+  timeText: {
+    mac: 'Command+Shift+X',
+    other: 'Ctrl+Shift+X'
+  },
+  dynamicTimeStamp: {
+    mac: 'Command+Shift+C',
+    other: 'Ctrl+Shift+C'
+  }
+}
+
+// 日期 → 时间戳后面的快捷键提示
+const timeStampShortcut = computed(() =>
+  isMacOs
+    ? displayKeyMappings.timeStamp.mac
+    : displayKeyMappings.timeStamp.other
+)
+
+// 时间戳 → 日期后面的快捷键提示
+const timeTextShortcut = computed(() =>
+  isMacOs ? displayKeyMappings.timeText.mac : displayKeyMappings.timeText.other
+)
+
+// 底部动态时间戳后面的快捷键提示
+const dynamicTimeStampShortcut = computed(() =>
+  isMacOs
+    ? displayKeyMappings.dynamicTimeStamp.mac
+    : displayKeyMappings.dynamicTimeStamp.other
+)
+
+// 快捷键绑定
+whenever(keys[keyMappings.timeStamp[isMacOs ? 'mac' : 'other']], () =>
+  复制(timeStampText.value)
+)
+whenever(keys[keyMappings.timeText[isMacOs ? 'mac' : 'other']], () =>
+  复制(timeText.value)
+)
+whenever(keys[keyMappings.dynamicTimeStamp[isMacOs ? 'mac' : 'other']], () =>
+  复制(底部动态时间戳.value)
+)
 
 const 时区 = useStorage('defaultTimeZone', 'Asia/Shanghai') // 默认时区
 const timezoneData = ref(TimezoneJson) // 时区数据
@@ -279,7 +356,6 @@ function 计算静态时间戳文字() {
 // 页面自动初始化
 const { pause, resume } = useRafFn(计算动态时间戳文字)
 
-const utools = window?.utools
 // utools数据初始化
 const timeInputRef = ref() // 文本输入框的dom
 const utoolsInit = () => {
