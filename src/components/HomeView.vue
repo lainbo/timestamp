@@ -6,7 +6,7 @@
       class="card p-32px pt-16px rounded-8px shadow-xl w-11/12 min-w-600px dark:shadow-#222 dark:shadow-lg"
     >
       <div class="mb-16px flex justify-between items-center">
-        <div class="space-x-11px">
+        <div class="space-x-11px operate">
           <a-radio-group
             v-model="时间戳类型"
             type="button"
@@ -43,6 +43,27 @@
               </template>
             </a-popover>
           </span>
+          <a-select
+            v-model:model-value="formatString"
+            size="large"
+            :style="{ width: '300px', alignSelf: 'flex-start', margin: '10px 0 0 0' }"
+            placeholder="请输入日期格式"
+            allow-create
+            @change="formatChange"
+          >
+            <a-option
+              v-for="item in formats"
+              :key="item"
+              :label="item"
+              :value="item"
+            >
+              <template #suffix>
+                <div @click.prevent.stop="delFormat(item)">
+                  <svg t="1721537471649" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5318" width="16" height="16"><path d="M780.8 710.4 582.4 505.6l198.4-198.4c19.2-19.2 19.2-51.2 0-70.4-19.2-19.2-51.2-19.2-70.4 0L518.4 441.6 313.6 243.2c-19.2-19.2-51.2-19.2-76.8 0-19.2 19.2-19.2 51.2 0 76.8l198.4 198.4-198.4 198.4c-19.2 19.2-19.2 51.2 0 70.4 19.2 19.2 51.2 19.2 70.4 0l198.4-198.4 198.4 198.4c19.2 19.2 51.2 19.2 76.8 0C806.4 761.6 806.4 729.6 780.8 710.4z" p-id="5319" fill="#2c2c2c"></path></svg>
+                </div>
+              </template>
+            </a-option>
+          </a-select>
         </div>
         <a-switch v-model="pageIsDark" type="round" @change="变更主题($event)">
           <template #checked>
@@ -65,12 +86,13 @@
           <a-form-item :label="`日期 → （${时区文字}）时间戳：`">
             <a-date-picker
               v-model="formData.date"
-              :style="{ width: '345px' }"
+              :style="{ width: '200px' }"
               show-time
               :time-picker-props="{
                 defaultValue: dayjs().startOf('day')
               }"
               format="YYYY-MM-DD HH:mm:ss"
+              position="right"
             />
             <a-tooltip
               :content="`点击复制 / ${timeStampShortcut}`"
@@ -94,7 +116,7 @@
               v-model="formData.time"
               placeholder="请输入时间戳"
               allow-clear
-              :style="{ width: '345px' }"
+              :style="{ width: '200px' }"
             />
             <a-tooltip
               :content="`点击复制 / ${timeTextShortcut}`"
@@ -129,7 +151,7 @@
                         'text-blue-600 font-bold text-18px dark:text-white':
                           按钮停止状态
                       }"
-                      @click="复制(底部动态时间戳)"
+                      @click="clickTimestamp(底部动态时间戳)"
                     >
                       {{ 底部动态时间戳 }}
                     </span>
@@ -181,6 +203,7 @@ import dayjs from 'dayjs'
 import { setTheme, pageIsDark } from '@/utils/theme.js'
 import TimezoneJson from '@/assets/timezone/TimezoneData.json'
 import { Message } from '@arco-design/web-vue'
+import { ref } from 'vue'
 const utools = window?.utools
 const keys = useMagicKeys()
 const isMacOs = utools?.isMacOs() || false
@@ -256,11 +279,47 @@ const 时区文字 = computed(() => {
   )
 })
 
+
+const formats = useStorage('formats', [
+  'YYYY-MM-DD HH:mm:ss',
+  'ddd, D MMM YYYY HH:mm:ss Z',
+  'YYYY-MM-DDTHH:mm:ssZ',
+  'YYYY-MM-DDTHH:mm:ss',
+  'YYYY年MM月DD日 HH时mm分ss秒'
+])
+const formatString = ref(formats.value[0])
+function formatChange(value) {
+  if (! formats.value.includes(value)) {
+    formats.value.push(value)
+    utools.dbStorage.setItem('formats', formats.value)
+  }
+  console.log(formats)
+}
+function delFormat(format) {
+  if (formats.value.length !== 1) {
+    formats.value = formats.value.filter(f => f !== format)
+    if (formatString.value === format) {
+      formatString.value = formats.value[0]
+    }
+    utools.dbStorage.setItem('formats', formats.value)
+  } else {
+    Message.success({ content: '至少保留一个格式', duration: 1000 })
+  }
+}
+
 function 重置数据() {
   formData.date = ''
   formData.time = undefined
   时间戳类型.value = 'ms'
   时区.value = 'Asia/Shanghai'
+  formats.value = [
+    'YYYY-MM-DD HH:mm:ss',
+    'ddd, D MMM YYYY HH:mm:ss Z',
+    'YYYY-MM-DDTHH:mm:ssZ',
+    'YYYY-MM-DDTHH:mm:ss',
+    'YYYY年MM月DD日 HH时mm分ss秒'
+  ]
+  utools.dbStorage.setItem('formats', formats.value)
   Message.success({ content: '已重置', duration: 1000 })
 }
 
@@ -290,14 +349,14 @@ const timeText = computed(() => {
   const time = parseInt(formData.time)
   if (isNaN(time)) return '-'
 
-  const 毫秒日期文字 = dayjs(time).tz(时区.value).format('YYYY-MM-DD HH:mm:ss')
+  const 毫秒日期文字 = dayjs(time).tz(时区.value).format(formatString.value)
   const 秒日期文字 = dayjs
     .unix(time)
     .tz(时区.value)
-    .format('YYYY-MM-DD HH:mm:ss')
+    .format(formatString.value)
   const 纳秒日期文字 = dayjs(time / 1000000)
     .tz(时区.value)
-    .format('YYYY-MM-DD HH:mm:ss')
+    .format(formatString.value)
 
   if (时间戳类型.value === 'ms') return 毫秒日期文字
   if (时间戳类型.value === 's') return 秒日期文字
@@ -315,6 +374,12 @@ onMounted(() => {
   utoolsInit()
 })
 
+// 点击当前时间戳时
+function clickTimestamp(timestamp) {
+  // 填充时间戳转日期的输入框
+  formData.time = timestamp
+  复制(timestamp)
+}
 const 按钮停止状态 = ref(false) // 按钮状态，是否停止
 // 开始/停止按钮
 function 暂停开始按钮() {
@@ -404,4 +469,12 @@ async function 复制(str = '') {
   font-feature-settings: 'tnum';
   font-variant-numeric: tabular-nums;
 }
+.operate {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  align-content: space-between;
+  width: 500px;
+}
+
 </style>
