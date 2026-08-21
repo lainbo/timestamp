@@ -2,6 +2,9 @@
   "pluginName": "时间戳日期转换",
   "description": "支持毫秒和秒的时间戳，支持日期和时间戳互转",
   "main": "index.html",
+  "development": {
+    "main": "http://127.0.0.1:1234"
+  },
   "version": "0.0.1",
   "author": "Lainbo",
   "logo": "logo.png",
@@ -10,11 +13,7 @@
       "code": "time",
       "label": "时间戳日期转换",
       "explain": "帮助您 日期 和 时间戳 相互转换的工具",
-      "cmds": [
-        "timeStamp",
-        "时间戳",
-        "sjc"
-      ]
+      "cmds": ["timeStamp", "时间戳", "sjc"]
     },
     {
       "code": "timeStamp",

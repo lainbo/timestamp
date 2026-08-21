@@ -1,7 +1,17 @@
 html,
 body {
-  font-family: 'Inter', 'HarmonyOS Sans SC Medium', 'HarmonyOS_Medium',
-    system-ui, —apple-system, Segoe UI, Rototo, Helvetica, Arial, sans-serif !important;
+  font-family:
+    'Inter',
+    'HarmonyOS Sans SC Medium',
+    'HarmonyOS_Medium',
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif !important;
 }
 
 body[arco-theme='dark'] {

@@ -1,4 +1,5 @@
-@use './HarmonyOS_Font_Rules.scss' as m; // 引入unicode-range规则文件
+@use 'sass:map';
+@use './HarmonyOS_Font_Rules' as m; // 引入unicode-range规则文件
 
 $provider: 'free'; // 如果值为'free'，将使用B站的字体文件，否则使用Netlify字体文件
 $weightStr: 'Medium'; // 可选值：'Regular'|'Medium'，不填或填错，将降级为'Regular'
@@ -17,15 +18,13 @@ $fontInfoMap: (
 
 // 判断$weightStr的值是否在$fontInfoMap中存在，不存在则降级为'Regular'
 $correctWeightStr: if(
-  map-has-key($fontInfoMap, $weightStr),
-  $weightStr,
-  'Regular'
+  sass(map.has-key($fontInfoMap, $weightStr)): $weightStr; else: 'Regular'
 );
 
 @mixin generateFontFace($file, $unicodeRange) {
-  $_fontInfo: map-get($fontInfoMap, $correctWeightStr);
-  $_fontFamily: map-get($_fontInfo, 'family');
-  $_fontWeight: map-get($_fontInfo, 'weight');
+  $_fontInfo: map.get($fontInfoMap, $correctWeightStr);
+  $_fontFamily: map.get($_fontInfo, 'family');
+  $_fontWeight: map.get($_fontInfo, 'weight');
 
   @font-face {
     font-family: $_fontFamily;

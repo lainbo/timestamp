@@ -1,39 +1,50 @@
 {
   "name": "timestamp_vite",
-  "private": true,
   "version": "0.0.0",
+  "private": true,
+  "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "eslint --fix --ext .js,.vue src",
-    "clear": "rimraf node_modules&&pnpm i",
-    "stable-up": "taze -w -I",
-    "up": "taze major -I"
+    "lint": "oxlint --deny-warnings .",
+    "lint:fix": "oxlint --fix .",
+    "format": "oxfmt --ignore-path=.oxfmtignore .",
+    "format:check": "oxfmt --ignore-path=.oxfmtignore --check .",
+    "check": "pnpm lint && pnpm format:check && pnpm build",
+    "clean": "rimraf dist node_modules",
+    "reinstall": "pnpm clean && pnpm install",
+    "deps:check": "taze",
+    "deps:update": "taze -wi",
+    "deps:update:major": "taze major -wi"
   },
   "dependencies": {
-    "@vueuse/core": "^10.9.0",
-    "dayjs": "^1.11.10",
-    "vue": "^3.4.21"
+    "@arco-design/web-vue": "^2.58.0",
+    "@vueuse/core": "^14.4.0",
+    "dayjs": "^1.11.23",
+    "vue": "^3.5.41"
   },
   "devDependencies": {
-    "@arco-design/web-vue": "^2.54.6",
-    "@iconify/json": "^2.2.191",
-    "@unocss/preset-web-fonts": "^0.58.5",
-    "@unocss/reset": "^0.58.5",
-    "@vitejs/plugin-vue": "^5.0.4",
-    "@vue/eslint-config-prettier": "^9.0.0",
-    "eslint": "^8.57.0",
-    "eslint-plugin-prettier": "^5.1.3",
-    "eslint-plugin-vue": "^9.23.0",
-    "less": "^4.2.0",
-    "prettier": "^3.2.5",
-    "sass": "^1.71.1",
-    "taze": "^0.13.3",
-    "terser": "^5.29.1",
-    "unocss": "^0.58.5",
-    "unplugin-auto-import": "^0.17.5",
-    "unplugin-vue-components": "^0.26.0",
-    "vite": "^5.1.6"
-  }
+    "@iconify-json/fxemoji": "^1.2.2",
+    "@iconify-json/ic": "^1.2.4",
+    "@iconify-json/majesticons": "^1.2.5",
+    "@iconify-json/material-symbols": "^1.2.89",
+    "@iconify-json/ri": "^1.2.10",
+    "@iconify-json/twemoji": "^1.2.5",
+    "@unocss/reset": "^66.8.1",
+    "@vitejs/plugin-vue": "^6.0.8",
+    "less": "^4.9.0",
+    "oxfmt": "^0.64.0",
+    "oxlint": "^1.79.0",
+    "rimraf": "^6.1.3",
+    "sass-embedded": "^1.103.1",
+    "taze": "^21.1.0",
+    "unocss": "^66.8.1",
+    "unplugin-vue-components": "^32.1.0",
+    "vite": "^8.2.2"
+  },
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  },
+  "packageManager": "pnpm@11.20.0"
 }
