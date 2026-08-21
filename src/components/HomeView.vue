@@ -7,12 +7,7 @@
     >
       <div class="mb-16px flex justify-between items-center">
         <div class="space-x-11px">
-          <a-radio-group
-            v-model="时间戳类型"
-            type="button"
-            size="large"
-            @change="radio切换($event)"
-          >
+          <a-radio-group v-model="时间戳类型" type="button" size="large">
             <a-radio value="ns"> 纳秒 </a-radio>
             <a-radio value="ms"> 毫秒 </a-radio>
             <a-radio value="s"> 秒 </a-radio>
@@ -20,14 +15,14 @@
           <a-select
             v-model:model-value="时区"
             size="large"
-            :style="{ width: '235px' }"
+            :style="{ width: '300px' }"
             placeholder="请选择时区"
             allow-search
           >
             <a-option
               v-for="item in timezoneData"
               :key="item.value"
-              :label="item.code"
+              :label="item.label"
               :value="item.value"
             />
           </a-select>
@@ -38,7 +33,7 @@
               ></i>
               <template #content>
                 <p>
-                  下列操作中，会根据对应国家是否执行夏令时自动进行转换，以转换结果为准，并不是普通的对时间进行加减
+                  时间戳本身不带时区。日期转时间戳时，会将输入视为所选时区的当地时间；反向转换时，会按所选时区显示，并自动处理夏令时
                 </p>
               </template>
             </a-popover>
@@ -71,6 +66,7 @@
                 defaultValue: dayjs().startOf('day')
               }"
               format="YYYY-MM-DD HH:mm:ss"
+              value-format="YYYY-MM-DD HH:mm:ss"
             />
             <a-tooltip
               :content="`点击复制 / ${timeStampShortcut}`"
@@ -177,10 +173,18 @@
 </template>
 
 <script setup>
-import dayjs from 'dayjs'
-import { setTheme, pageIsDark } from '@/utils/theme.js'
-import TimezoneJson from '@/assets/timezone/TimezoneData.json'
 import { Message } from '@arco-design/web-vue'
+import {
+  useClipboard,
+  useMagicKeys,
+  useRafFn,
+  useStorage,
+  whenever
+} from '@vueuse/core'
+import dayjs from 'dayjs'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
+import TimezoneJson from '@/assets/timezone/TimezoneData.json'
+import { pageIsDark, setTheme } from '@/utils/theme.js'
 const utools = window?.utools
 const keys = useMagicKeys()
 const isMacOs = utools?.isMacOs() || false
@@ -248,11 +252,14 @@ whenever(keys[keyMappings.dynamicTimeStamp[isMacOs ? 'mac' : 'other']], () =>
 )
 
 const 时区 = useStorage('defaultTimeZone', 'Asia/Shanghai') // 默认时区
-const timezoneData = ref(TimezoneJson) // 时区数据
+const timezoneData = TimezoneJson.map(item => ({
+  ...item,
+  label: `${item.name}（${item.value}）`
+}))
 
 const 时区文字 = computed(() => {
-  return TimezoneJson.find(item => item.value === 时区.value).code?.substring(
-    12
+  return (
+    timezoneData.find(item => item.value === 时区.value)?.name ?? 时区.value
   )
 })
 
@@ -261,6 +268,9 @@ function 重置数据() {
   formData.time = undefined
   时间戳类型.value = 'ms'
   时区.value = 'Asia/Shanghai'
+  按钮停止状态.value = false
+  更新当前时间戳()
+  resume()
   Message.success({ content: '已重置', duration: 1000 })
 }
 
@@ -269,39 +279,65 @@ function 变更主题(val) {
   setTheme(val)
 }
 
-const 底部动态时间戳 = ref(0)
 const 时间戳类型 = useStorage('defaultUnit', 'ms') // 单选框值，默认毫秒
+const 每秒毫秒数 = 1000n
+const 每毫秒纳秒数 = 1000000n
+const 日期最大毫秒数 = 8640000000000000n
+
+function 格式化时间戳(毫秒, 单位) {
+  const 毫秒整数 = BigInt(毫秒)
+
+  if (单位 === 's') return (毫秒整数 / 每秒毫秒数).toString()
+  if (单位 === 'ms') return 毫秒整数.toString()
+  return (毫秒整数 * 每毫秒纳秒数).toString()
+}
+
+function 纳秒转毫秒(纳秒) {
+  const 毫秒 = 纳秒 / 每毫秒纳秒数
+  const 存在不足一毫秒的负数余数 = 纳秒 < 0n && 纳秒 % 每毫秒纳秒数 !== 0n
+
+  return 存在不足一毫秒的负数余数 ? 毫秒 - 1n : 毫秒
+}
+
+function 时间戳转毫秒(时间戳, 单位) {
+  if (单位 === 's') return 时间戳 * 每秒毫秒数
+  if (单位 === 'ms') return 时间戳
+  if (单位 === 'ns') return 纳秒转毫秒(时间戳)
+  return undefined
+}
 
 // 日期 → 时间戳后面的文字
 const timeStampText = computed(() => {
-  if (!formData?.date) return '-'
+  if (!formData.date) return '-'
 
-  const 毫秒文字 = dayjs(formData.date).tz(时区.value, true).valueOf()
-  const 秒文字 = dayjs(formData.date).tz(时区.value, true).unix()
-  const 纳秒文字 = dayjs(formData.date).tz(时区.value, true).valueOf() * 1000000
+  const 本地日期 = dayjs(formData.date)
+  if (!本地日期.isValid()) return '-'
 
-  if (时间戳类型.value === 'ms') return 毫秒文字
-  if (时间戳类型.value === 's') return 秒文字
-  return 纳秒文字
+  const 时区日期 = 本地日期.tz(时区.value, true)
+  const 毫秒 = 时区日期.valueOf()
+
+  if (时间戳类型.value === 's') return 时区日期.unix().toString()
+  return 格式化时间戳(毫秒, 时间戳类型.value)
 })
 
 // 时间戳 → 日期后面的文字
 const timeText = computed(() => {
-  const time = parseInt(formData.time)
-  if (isNaN(time)) return '-'
+  const 输入文字 = String(formData.time ?? '').trim()
+  if (!/^-?\d+$/.test(输入文字)) return '-'
 
-  const 毫秒日期文字 = dayjs(time).tz(时区.value).format('YYYY-MM-DD HH:mm:ss')
-  const 秒日期文字 = dayjs
-    .unix(time)
-    .tz(时区.value)
-    .format('YYYY-MM-DD HH:mm:ss')
-  const 纳秒日期文字 = dayjs(time / 1000000)
-    .tz(时区.value)
-    .format('YYYY-MM-DD HH:mm:ss')
+  try {
+    const 毫秒 = 时间戳转毫秒(BigInt(输入文字), 时间戳类型.value)
+    if (毫秒 === undefined || 毫秒 > 日期最大毫秒数 || 毫秒 < -日期最大毫秒数) {
+      return '-'
+    }
 
-  if (时间戳类型.value === 'ms') return 毫秒日期文字
-  if (时间戳类型.value === 's') return 秒日期文字
-  return 纳秒日期文字
+    const 日期 = dayjs(Number(毫秒))
+    if (!日期.isValid()) return '-'
+
+    return 日期.tz(时区.value).format('YYYY-MM-DD HH:mm:ss')
+  } catch {
+    return '-'
+  }
 })
 
 // 两个输入框
@@ -315,46 +351,30 @@ onMounted(() => {
   utoolsInit()
 })
 
+const 当前毫秒 = ref(Date.now())
+const 底部动态时间戳 = computed(() =>
+  格式化时间戳(当前毫秒.value, 时间戳类型.value)
+)
 const 按钮停止状态 = ref(false) // 按钮状态，是否停止
+
+function 更新当前时间戳() {
+  当前毫秒.value = Date.now()
+}
+
+// 页面自动初始化
+const { pause, resume } = useRafFn(更新当前时间戳)
+
 // 开始/停止按钮
 function 暂停开始按钮() {
   if (!按钮停止状态.value) {
     pause()
     按钮停止状态.value = true
   } else {
+    更新当前时间戳()
     resume()
     按钮停止状态.value = false
   }
 }
-// 计算底部动态时间戳的值
-function 计算动态时间戳文字() {
-  const 当前毫秒 = dayjs().tz(时区.value).valueOf()
-  const 当前秒 = dayjs().tz(时区.value).unix()
-  const 当前纳秒 = 当前毫秒 * 1000000
-
-  const 毫秒文字 = String(当前毫秒).substring(0, 10).padEnd(13, '0')
-  const 秒文字 = String(当前秒)
-  const 纳秒文字 = String(当前纳秒).substring(0, 10).padEnd(19, '0')
-
-  if (时间戳类型.value === 'ms') 底部动态时间戳.value = 毫秒文字
-  else if (时间戳类型.value === 's') 底部动态时间戳.value = 秒文字
-  else 底部动态时间戳.value = 纳秒文字
-}
-
-// 计算暂停时，底部动态时间戳的值
-// 因为是暂停的，所以不需要dayjs，切割字符串即可
-function 计算静态时间戳文字() {
-  const 毫秒文字 = String(底部动态时间戳.value).substring(0, 10).padEnd(13, '0')
-  const 秒文字 = String(底部动态时间戳.value).substring(0, 10)
-  const 纳秒文字 = String(底部动态时间戳.value).substring(0, 19)
-
-  if (时间戳类型.value === 'ms') 底部动态时间戳.value = 毫秒文字
-  else if (时间戳类型.value === 's') 底部动态时间戳.value = 秒文字
-  else 底部动态时间戳.value = 纳秒文字
-}
-
-// 页面自动初始化
-const { pause, resume } = useRafFn(计算动态时间戳文字)
 
 // utools数据初始化
 const timeInputRef = ref() // 文本输入框的dom
@@ -381,11 +401,6 @@ watch(
   }
 )
 
-// 切换单选，重新渲染底部动态时间戳的显示
-function radio切换(val) {
-  时间戳类型.value = val
-  按钮停止状态.value ? 计算静态时间戳文字() : 计算动态时间戳文字()
-}
 const { copy } = useClipboard()
 // 复制成功的提示
 async function 复制(str = '') {
