@@ -252,15 +252,18 @@ whenever(keys[keyMappings.dynamicTimeStamp[isMacOs ? 'mac' : 'other']], () =>
 )
 
 const 时区 = useStorage('defaultTimeZone', 'Asia/Shanghai') // 默认时区
-const timezoneData = TimezoneJson.map(item => ({
-  ...item,
-  label: `${item.name}（${item.value}）`
-}))
+const timezoneData = TimezoneJson.map(item => {
+  const utc偏移 = `UTC${dayjs().tz(item.value).format('Z')}`
+  return {
+    ...item,
+    utc偏移,
+    label: `${item.name}（${utc偏移} / ${item.value}）`
+  }
+})
 
 const 时区文字 = computed(() => {
-  return (
-    timezoneData.find(item => item.value === 时区.value)?.name ?? 时区.value
-  )
+  const 项 = timezoneData.find(item => item.value === 时区.value)
+  return 项 ? `${项.name} ${项.utc偏移}` : 时区.value
 })
 
 function 重置数据() {
