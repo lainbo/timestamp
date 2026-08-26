@@ -11,6 +11,24 @@ function 读取主题偏好() {
   return 合法主题.has(原始) ? 原始 : 'auto'
 }
 
+export const 主题选项 = [
+  {
+    value: 'auto',
+    label: '自动',
+    icon: 'i-fluent-dark-theme-24-filled'
+  },
+  {
+    value: 'dark',
+    label: '深色',
+    icon: 'i-ph-moon-bold'
+  },
+  {
+    value: 'light',
+    label: '浅色',
+    icon: 'i-ph-sun-bold'
+  }
+]
+
 export const 主题偏好 = ref(读取主题偏好())
 
 watch(主题偏好, 值 => {

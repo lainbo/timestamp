@@ -6,25 +6,15 @@
       class="card p-32px pt-16px rounded-8px shadow-xl w-11/12 min-w-600px dark:shadow-#222 dark:shadow-lg"
     >
       <div class="mb-16px space-x-11px">
-        <a-radio-group v-model="时间戳类型" type="button" size="large">
-          <a-radio value="ns"> 纳秒 </a-radio>
-          <a-radio value="ms"> 毫秒 </a-radio>
-          <a-radio value="s"> 秒 </a-radio>
-        </a-radio-group>
         <a-select
           v-model:model-value="时区"
           size="large"
-          :style="{ width: '300px' }"
+          :style="{ width: '345px' }"
           placeholder="请选择时区"
           allow-search
-        >
-          <a-option
-            v-for="item in timezoneData"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value"
-          />
-        </a-select>
+          :options="timezoneData"
+          :virtual-list-props="{ height: 280 }"
+        />
         <span class="inline-block">
           <a-popover title="注意">
             <i
@@ -101,86 +91,73 @@
           <a-form-item
             :label="`当前时间戳${按钮停止状态 ? '（已暂停）' : ''}：`"
           >
-            <div class="flex justify-between flex-1">
-              <div class="space-x-12px flex items-center">
-                <div class="w-235px">
-                  <a-tooltip
-                    :content="`点击复制 / ${dynamicTimeStampShortcut}`"
-                    position="bottom"
-                    mini
+            <div class="space-x-12px flex items-center flex-1">
+              <div class="w-235px">
+                <a-tooltip
+                  :content="`点击复制 / ${dynamicTimeStampShortcut}`"
+                  position="bottom"
+                  mini
+                >
+                  <span
+                    class="dynamic_timestamp cursor-pointer transition-all text-16px inline-block dark:text-white"
+                    :class="{
+                      'text-blue-600 font-bold text-18px dark:text-white':
+                        按钮停止状态
+                    }"
+                    @click="复制(底部动态时间戳)"
                   >
-                    <span
-                      class="dynamic_timestamp cursor-pointer transition-all text-16px inline-block dark:text-white"
-                      :class="{
-                        'text-blue-600 font-bold text-18px dark:text-white':
-                          按钮停止状态
-                      }"
-                      @click="复制(底部动态时间戳)"
-                    >
-                      {{ 底部动态时间戳 }}
-                    </span>
-                  </a-tooltip>
-                </div>
+                    {{ 底部动态时间戳 }}
+                  </span>
+                </a-tooltip>
+              </div>
 
-                <a-button
-                  type="text"
-                  :status="按钮停止状态 ? 'success' : 'danger'"
-                  @click="暂停开始按钮()"
-                >
-                  <template #icon>
-                    <i
-                      :class="[
-                        按钮停止状态 ? 'i-ri-play-fill' : 'i-ic-twotone-pause'
-                      ]"
-                    ></i>
-                  </template>
-                  <template #default>
-                    {{ 按钮停止状态 ? '继续' : '暂停' }}
-                  </template>
-                </a-button>
-              </div>
-              <div>
-                <a-popconfirm
-                  content-class="w-250px"
-                  content="时间戳的单位、时区、页面数据将恢复为初始值，确定吗？"
-                  position="tr"
-                  @ok="重置数据()"
-                >
-                  <a-button size="small">
-                    <template #icon>
-                      <i class="i-material-symbols-refresh-rounded"></i>
-                    </template>
-                    <template #default> 重置数据 </template>
-                  </a-button>
-                </a-popconfirm>
-              </div>
+              <a-button
+                type="text"
+                :status="按钮停止状态 ? 'success' : 'danger'"
+                @click="暂停开始按钮()"
+              >
+                <template #icon>
+                  <i
+                    :class="[
+                      按钮停止状态 ? 'i-ri-play-fill' : 'i-ic-twotone-pause'
+                    ]"
+                  ></i>
+                </template>
+                <template #default>
+                  {{ 按钮停止状态 ? '继续' : '暂停' }}
+                </template>
+              </a-button>
             </div>
           </a-form-item>
         </a-form>
       </div>
     </div>
     <div class="absolute right-16px bottom-16px">
-      <a-dropdown trigger="click" position="tr" @select="选择主题">
-        <a-button type="text" size="small">
-          <template #icon>
-            <i :class="主题图标" class="text-18px"></i>
-          </template>
+      <a-tooltip content="设置" position="left" mini>
+        <a-button
+          type="text"
+          size="small"
+          class="group"
+          @click="设置可见 = true"
+        >
+          <span class="relative inline-block w-18px h-18px">
+            <i
+              class="i-ci-settings-future text-18px absolute inset-0 group-hover:opacity-0 transition-opacity"
+            ></i>
+            <i
+              class="i-eos-icons-rotating-gear text-18px absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
+            ></i>
+          </span>
         </a-button>
-        <template #content>
-          <a-doption
-            v-for="项 in 主题选项"
-            :key="项.value"
-            :value="项.value"
-            :active="主题偏好 === 项.value"
-          >
-            <template #icon>
-              <i :class="项.icon"></i>
-            </template>
-            {{ 项.label }}
-          </a-doption>
-        </template>
-      </a-dropdown>
+      </a-tooltip>
     </div>
+    <SettingsModal
+      v-model:visible="设置可见"
+      v-model:已选时区="已选时区"
+      v-model:时间戳类型="时间戳类型"
+      :时区选项="全部时区选项"
+      @重置="重置数据"
+    />
   </div>
 </template>
 
@@ -195,8 +172,15 @@ import {
 } from '@vueuse/core'
 import dayjs from 'dayjs'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
-import TimezoneJson from '@/assets/timezone/TimezoneData.json'
-import { 同步主题偏好, 主题偏好 } from '@/utils/theme.js'
+import SettingsModal from '@/components/SettingsModal.vue'
+import { 同步主题偏好 } from '@/utils/theme.js'
+import {
+  构建时区选项,
+  默认已选时区,
+  回退当前时区,
+  读取已选时区,
+  写入已选时区
+} from '@/utils/timezone.js'
 const utools = window?.utools
 const keys = useMagicKeys()
 const isMacOs = utools?.isMacOs() || false
@@ -264,17 +248,16 @@ whenever(keys[keyMappings.dynamicTimeStamp[isMacOs ? 'mac' : 'other']], () =>
 )
 
 const 时区 = useStorage('defaultTimeZone', 'Asia/Shanghai') // 默认时区
-const timezoneData = TimezoneJson.map(item => {
-  const utc偏移 = `UTC${dayjs().tz(item.value).format('Z')}`
-  return {
-    ...item,
-    utc偏移,
-    label: `${item.name}（${utc偏移} / ${item.value}）`
-  }
-})
+const 全部时区选项 = 构建时区选项()
+const 合法时区 = new Set(全部时区选项.map(项 => 项.value))
+const 已选时区 = ref(读取已选时区(合法时区))
+const 设置可见 = ref(false)
+const timezoneData = computed(() =>
+  全部时区选项.filter(项 => 已选时区.value.includes(项.value))
+)
 
 const 时区文字 = computed(() => {
-  const 项 = timezoneData.find(item => item.value === 时区.value)
+  const 项 = timezoneData.value.find(item => item.value === 时区.value)
   return 项 ? `${项.name} ${项.utc偏移}` : 时区.value
 })
 
@@ -282,36 +265,11 @@ function 重置数据() {
   formData.date = ''
   formData.time = undefined
   时间戳类型.value = 'ms'
-  时区.value = 'Asia/Shanghai'
+  时区.value = 回退当前时区(已选时区.value, 'Asia/Shanghai')
   按钮停止状态.value = false
   更新当前时间戳()
   resume()
   Message.success({ content: '已重置', duration: 1000 })
-}
-
-const 主题选项 = [
-  {
-    value: 'auto',
-    label: '自动',
-    icon: 'i-fluent-dark-theme-24-filled'
-  },
-  {
-    value: 'dark',
-    label: '深色',
-    icon: 'i-ph-moon-bold'
-  },
-  {
-    value: 'light',
-    label: '浅色',
-    icon: 'i-ph-sun-bold'
-  }
-]
-const 主题图标 = computed(
-  () => 主题选项.find(项 => 项.value === 主题偏好.value)?.icon
-)
-
-function 选择主题(值) {
-  主题偏好.value = 值
 }
 
 const 时间戳类型 = useStorage('defaultUnit', 'ms') // 单选框值，默认毫秒
@@ -425,6 +383,11 @@ const utoolsInit = () => {
   })
   utools.subInputBlur()
   时间戳类型.value = utools.dbStorage.getItem('defaultUnit') || 'ms'
+  已选时区.value = 读取已选时区(合法时区)
+  时区.value = 回退当前时区(
+    已选时区.value,
+    utools.dbStorage.getItem('defaultTimeZone')
+  )
   同步主题偏好()
 }
 
@@ -435,6 +398,30 @@ watch(
       utools.dbStorage.setItem('defaultUnit', val)
     }
   }
+)
+
+watch(
+  () => 时区.value,
+  val => {
+    if (utools) {
+      utools.dbStorage.setItem('defaultTimeZone', val)
+    }
+  }
+)
+
+watch(
+  已选时区,
+  值 => {
+    if (!值.length) {
+      已选时区.value = 合法时区.has(时区.value)
+        ? [时区.value]
+        : [...默认已选时区]
+      return
+    }
+    写入已选时区(值)
+    时区.value = 回退当前时区(值, 时区.value)
+  },
+  { deep: true }
 )
 
 const { copy } = useClipboard()
