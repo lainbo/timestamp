@@ -16,8 +16,12 @@
           :data="时区选项"
           show-search
           :title="['未选', '已选']"
-          :source-input-search-props="{ placeholder: '搜索未选时区' }"
-          :target-input-search-props="{ placeholder: '搜索已选时区' }"
+          :source-input-search-props="{
+            placeholder: '搜索未选时区(英文名能更好的匹配)'
+          }"
+          :target-input-search-props="{
+            placeholder: '搜索已选时区(英文名能更好的匹配)'
+          }"
         />
       </div>
       <a-form class="settings-form" layout="vertical" :model="草稿">
@@ -36,7 +40,6 @@
             </a-radio>
           </a-radio-group>
         </a-form-item>
-
       </a-form>
     </div>
     <template #footer>
