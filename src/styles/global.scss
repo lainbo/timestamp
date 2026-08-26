@@ -14,10 +14,6 @@ body {
     sans-serif !important;
 }
 
-body[arco-theme='dark'] {
-  --arcoblue-6: 100, 108, 255;
-}
-
 .arco-message {
   border-radius: 8px;
 }
@@ -35,6 +31,29 @@ body[arco-theme='dark'] {
 ::selection {
   background-color: #5b61ff;
   color: #fff;
+}
+
+:root {
+  --ani-bezier: cubic-bezier(0.22, 0.58, 0.12, 0.98); // 动画曲线
+}
+
+body[arco-theme='dark'] {
+  --arcoblue-6: 100, 108, 255;
+}
+
+// 渐显渐隐的效果
+.custom-fade-enter-active,
+.custom-fade-leave-active {
+  transition: opacity 0.25s var(--ani-bezier);
+}
+
+.custom-fade-enter-from,
+.custom-fade-leave-to {
+  opacity: 0;
+}
+
+.custom-fade-leave-active {
+  position: absolute;
 }
 
 .arco-popover-popup-content {

@@ -132,24 +132,14 @@
         </a-form>
       </div>
     </div>
-    <div class="absolute right-16px bottom-16px">
-      <a-tooltip content="设置" position="left" mini>
-        <a-button
-          type="text"
-          size="small"
-          class="group"
+    <div class="absolute right-3px bottom-3px">
+        <SmoothTransitionIcon
+          class="icon"
+          默认图标class="i-ci-settings-future mb-0"
+          hover时候的class="i-eos-icons-rotating-gear mb-0"
+          渲染标签="button"
           @click="设置可见 = true"
-        >
-          <span class="relative inline-block w-18px h-18px">
-            <i
-              class="i-ci-settings-future text-18px absolute inset-0 group-hover:opacity-0 transition-opacity"
-            ></i>
-            <i
-              class="i-eos-icons-rotating-gear text-18px absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
-            ></i>
-          </span>
-        </a-button>
-      </a-tooltip>
+        />
     </div>
     <SettingsModal
       v-model:visible="设置可见"
@@ -173,6 +163,7 @@ import {
 import dayjs from 'dayjs'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import SettingsModal from '@/components/SettingsModal.vue'
+import SmoothTransitionIcon from '@/components/SmoothTransitionIcon.vue'
 import { 同步主题偏好 } from '@/utils/theme.js'
 import {
   构建时区选项,
@@ -441,5 +432,32 @@ async function 复制(str = '') {
   // 等宽数字
   font-feature-settings: 'tnum';
   font-variant-numeric: tabular-nums;
+}
+
+.icon {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 22px;
+  color: #999;
+  transition: all 400ms var(--ani-bezier);
+
+  &:hover {
+    color: #666;
+    transform: rotate(90deg);
+  }
+
+  &:active {
+    color: #646cff;
+  }
+}
+
+body[arco-theme='dark'] .icon:hover {
+  color: #d9d9d9;
+}
+body[arco-theme='dark'] .icon:active {
+  color: #fff;
 }
 </style>
