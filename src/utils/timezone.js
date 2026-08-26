@@ -38,22 +38,22 @@ export function 构建时区选项() {
   const 集合 = new Set(运行时区清单())
   for (const id of 默认已选时区) 集合.add(id)
 
-  return [...集合]
-    .map(id => {
-      const { 分钟, 文字 } = 时区偏移(id)
-      const name = 时区中文名(id)
-      return {
-        value: id,
-        name,
-        utc偏移: 文字,
-        分钟,
-        label: `${name}（${文字}，${id}）`,
-        disabled: false
-      }
-    })
-    .toSorted(
-      (a, b) => a.分钟 - b.分钟 || a.label.localeCompare(b.label, 'zh-CN')
-    )
+  const 选项 = [...集合].map(id => {
+    const { 分钟, 文字 } = 时区偏移(id)
+    const name = 时区中文名(id)
+    return {
+      value: id,
+      name,
+      utc偏移: 文字,
+      分钟,
+      label: `${name}（${文字}，${id}）`,
+      disabled: false
+    }
+  })
+  选项.sort(
+    (a, b) => a.分钟 - b.分钟 || a.label.localeCompare(b.label, 'zh-CN')
+  )
+  return 选项
 }
 
 export function 规范化已选(已选, 合法) {

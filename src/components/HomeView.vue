@@ -1,6 +1,6 @@
 <template>
   <div
-    class="contain main overflow-hidden px-21px pb-26px pt-6px w-screen h-screen flex flex-col items-center pt-8px bg-white dark:bg-#303133 relative"
+    class="contain main overflow-hidden px-23px pb-28px pt-6px w-screen h-screen flex flex-col items-center pt-8px bg-white dark:bg-#303133 relative"
   >
     <div
       class="card p-32px pt-16px rounded-8px size-full bg-white dark:bg-#242425a6 border border-solid border-#e9e9e9 dark:border-#3d3d3d"
@@ -133,13 +133,13 @@
       </div>
     </div>
     <div class="absolute right-3px bottom-3px">
-        <SmoothTransitionIcon
-          class="icon"
-          默认图标class="i-ci-settings-future mb-0"
-          hover时候的class="i-eos-icons-rotating-gear mb-0"
-          渲染标签="button"
-          @click="设置可见 = true"
-        />
+      <SmoothTransitionIcon
+        class="icon"
+        默认图标class="i-ci-settings-future mb-0"
+        hover时候的class="i-eos-icons-rotating-gear mb-0"
+        渲染标签="button"
+        @click="设置可见 = true"
+      />
     </div>
     <SettingsModal
       v-model:visible="设置可见"
@@ -242,6 +242,7 @@ const 时区 = useStorage('defaultTimeZone', 'Asia/Shanghai') // 默认时区
 const 全部时区选项 = 构建时区选项()
 const 合法时区 = new Set(全部时区选项.map(项 => 项.value))
 const 已选时区 = ref(读取已选时区(合法时区))
+时区.value = 回退当前时区(已选时区.value, 时区.value)
 const 设置可见 = ref(false)
 const timezoneData = computed(() =>
   全部时区选项.filter(项 => 已选时区.value.includes(项.value))
@@ -374,11 +375,12 @@ const utoolsInit = () => {
     }
   })
   utools.subInputBlur()
-  时间戳类型.value = utools.dbStorage.getItem('defaultUnit') || 'ms'
+  时间戳类型.value =
+    utools.dbStorage.getItem('defaultUnit') || 时间戳类型.value || 'ms'
   已选时区.value = 读取已选时区(合法时区)
   时区.value = 回退当前时区(
     已选时区.value,
-    utools.dbStorage.getItem('defaultTimeZone')
+    utools.dbStorage.getItem('defaultTimeZone') ?? 时区.value
   )
   同步主题偏好()
 }
