@@ -21,6 +21,9 @@ importers:
         specifier: ^3.5.41
         version: 3.5.41
     devDependencies:
+      '@iconify-json/fluent':
+        specifier: ^1.2.57
+        version: 1.2.57
       '@iconify-json/fxemoji':
         specifier: ^1.2.2
         version: 1.2.2
@@ -33,6 +36,9 @@ importers:
       '@iconify-json/material-symbols':
         specifier: ^1.2.89
         version: 1.2.89
+      '@iconify-json/ph':
+        specifier: ^1.2.2
+        version: 1.2.2
       '@iconify-json/ri':
         specifier: ^1.2.10
         version: 1.2.10
@@ -123,6 +129,9 @@ packages:
   '@henrygd/queue@1.2.0':
     resolution: {integrity: sha512-jW/BLSTpcvExDhqJGxtIPgGr2O0IFF8XUNDwEbfCfhrXT8a4xztQ9Lv6U/vbYzYC0xVWn+3zv6YnLUh3bEFUKA==}
 
+  '@iconify-json/fluent@1.2.57':
+    resolution: {integrity: sha512-ecYjdYhwiQ+UNz94cOnYY8RCRbZ8+N54jzocxmfgRZgblM2IvG8RRGeI9Z52jxG8KhZcLftxyhvvk/rrqKSZLw==}
+
   '@iconify-json/fxemoji@1.2.2':
     resolution: {integrity: sha512-UAasRaxzFUKfIGSmLwnoarsssA4LX0VLLuEmplIqM6ZNQqIQRtav8tZ4H1neTlBreXuMQyAifr5jP4kn78DpiQ==}
 
@@ -134,6 +143,9 @@ packages:
 
   '@iconify-json/material-symbols@1.2.89':
     resolution: {integrity: sha512-wYJjKAOptNhc8Bq65PPJVEz/4Ozm+b3ZWEB3H65yGw37dr9AvXibW0GkEdVD7qrCtbD6aC6fY7SLmQCuUGtEAQ==}
+
+  '@iconify-json/ph@1.2.2':
+    resolution: {integrity: sha512-PgkEZNtqa8hBGjHXQa4pMwZa93hmfu8FUSjs/nv4oUU6yLsgv+gh9nu28Kqi8Fz9CCVu4hj1MZs9/60J57IzFw==}
 
   '@iconify-json/ri@1.2.10':
     resolution: {integrity: sha512-WWMhoncVVM+Xmu9T5fgu2lhYRrKTEWhKk3Com0KiM111EeEsRLiASjpsFKnC/SrB6covhUp95r2mH8tGxhgd5Q==}
@@ -1726,6 +1738,10 @@ snapshots:
 
   '@henrygd/queue@1.2.0': {}
 
+  '@iconify-json/fluent@1.2.57':
+    dependencies:
+      '@iconify/types': 2.0.0
+
   '@iconify-json/fxemoji@1.2.2':
     dependencies:
       '@iconify/types': 2.0.0
@@ -1739,6 +1755,10 @@ snapshots:
       '@iconify/types': 2.0.0
 
   '@iconify-json/material-symbols@1.2.89':
+    dependencies:
+      '@iconify/types': 2.0.0
+
+  '@iconify-json/ph@1.2.2':
     dependencies:
       '@iconify/types': 2.0.0
 

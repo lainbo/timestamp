@@ -1,25 +1,38 @@
-import { useDark } from '@vueuse/core'
-import { ref, watchEffect } from 'vue'
+import { useColorMode } from '@vueuse/core'
+import { ref, watch } from 'vue'
 
-const bodyDom = document.body // body的dom
-const isDark = useDark() // 响应式：是否为暗色
+const 存储键 = 'defaultTheme'
+const 合法主题 = new Set(['auto', 'light', 'dark'])
 
-export const pageIsDark = ref(false) // 开关绑定值
-/**
- * 设置主题
- * @param {Boolean} val true: 深色，false: 浅色
- */
-export function setTheme(val) {
-  pageIsDark.value = val
-  document.documentElement.classList.toggle('dark', val)
-  if (val) {
-    bodyDom.setAttribute('arco-theme', 'dark')
-  } else {
-    bodyDom.removeAttribute('arco-theme')
-  }
+function 读取主题偏好() {
+  const 原始 = window.utools?.dbStorage
+    ? window.utools.dbStorage.getItem(存储键)
+    : localStorage.getItem(存储键)
+  return 合法主题.has(原始) ? 原始 : 'auto'
 }
 
-// 监听是否暗色
-watchEffect(() => {
-  setTheme(isDark.value)
+export const 主题偏好 = ref(读取主题偏好())
+
+watch(主题偏好, 值 => {
+  if (window.utools?.dbStorage) {
+    window.utools.dbStorage.setItem(存储键, 值)
+    return
+  }
+  localStorage.setItem(存储键, 值)
 })
+
+useColorMode({
+  storageRef: 主题偏好,
+  onChanged(mode, defaultHandler) {
+    defaultHandler(mode)
+    if (mode === 'dark') {
+      document.body.setAttribute('arco-theme', 'dark')
+      return
+    }
+    document.body.removeAttribute('arco-theme')
+  }
+})
+
+export function 同步主题偏好() {
+  主题偏好.value = 读取主题偏好()
+}

@@ -1,52 +1,42 @@
 <template>
   <div
-    class="contain w-screen h-screen flex flex-col items-center pt-8px bg-white dark:bg-#303133"
+    class="contain w-screen h-screen flex flex-col items-center pt-8px bg-white dark:bg-#303133 relative"
   >
     <div
       class="card p-32px pt-16px rounded-8px shadow-xl w-11/12 min-w-600px dark:shadow-#222 dark:shadow-lg"
     >
-      <div class="mb-16px flex justify-between items-center">
-        <div class="space-x-11px">
-          <a-radio-group v-model="时间戳类型" type="button" size="large">
-            <a-radio value="ns"> 纳秒 </a-radio>
-            <a-radio value="ms"> 毫秒 </a-radio>
-            <a-radio value="s"> 秒 </a-radio>
-          </a-radio-group>
-          <a-select
-            v-model:model-value="时区"
-            size="large"
-            :style="{ width: '300px' }"
-            placeholder="请选择时区"
-            allow-search
-          >
-            <a-option
-              v-for="item in timezoneData"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            />
-          </a-select>
-          <span class="inline-block">
-            <a-popover title="注意">
-              <i
-                class="i-majesticons-exclamation-circle-line text-20px dark:text-white"
-              ></i>
-              <template #content>
-                <p>
-                  时间戳本身不带时区。日期转时间戳时，会将输入视为所选时区的当地时间；反向转换时，会按所选时区显示，并自动处理夏令时
-                </p>
-              </template>
-            </a-popover>
-          </span>
-        </div>
-        <a-switch v-model="pageIsDark" type="round" @change="变更主题($event)">
-          <template #checked>
-            <i class="i-fxemoji-crescentmoon text-16px mb-4px"></i>
-          </template>
-          <template #unchecked>
-            <i class="i-twemoji-sun-with-face text-16px mb-4px"></i>
-          </template>
-        </a-switch>
+      <div class="mb-16px space-x-11px">
+        <a-radio-group v-model="时间戳类型" type="button" size="large">
+          <a-radio value="ns"> 纳秒 </a-radio>
+          <a-radio value="ms"> 毫秒 </a-radio>
+          <a-radio value="s"> 秒 </a-radio>
+        </a-radio-group>
+        <a-select
+          v-model:model-value="时区"
+          size="large"
+          :style="{ width: '300px' }"
+          placeholder="请选择时区"
+          allow-search
+        >
+          <a-option
+            v-for="item in timezoneData"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          />
+        </a-select>
+        <span class="inline-block">
+          <a-popover title="注意">
+            <i
+              class="i-majesticons-exclamation-circle-line text-20px dark:text-white"
+            ></i>
+            <template #content>
+              <p>
+                时间戳本身不带时区。日期转时间戳时，会将输入视为所选时区的当地时间；反向转换时，会按所选时区显示，并自动处理夏令时
+              </p>
+            </template>
+          </a-popover>
+        </span>
       </div>
       <a-divider></a-divider>
 
@@ -169,6 +159,28 @@
         </a-form>
       </div>
     </div>
+    <div class="absolute right-16px bottom-16px">
+      <a-dropdown trigger="click" position="tr" @select="选择主题">
+        <a-button type="text" size="small">
+          <template #icon>
+            <i :class="主题图标" class="text-18px"></i>
+          </template>
+        </a-button>
+        <template #content>
+          <a-doption
+            v-for="项 in 主题选项"
+            :key="项.value"
+            :value="项.value"
+            :active="主题偏好 === 项.value"
+          >
+            <template #icon>
+              <i :class="项.icon"></i>
+            </template>
+            {{ 项.label }}
+          </a-doption>
+        </template>
+      </a-dropdown>
+    </div>
   </div>
 </template>
 
@@ -184,7 +196,7 @@ import {
 import dayjs from 'dayjs'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import TimezoneJson from '@/assets/timezone/TimezoneData.json'
-import { pageIsDark, setTheme } from '@/utils/theme.js'
+import { 同步主题偏好, 主题偏好 } from '@/utils/theme.js'
 const utools = window?.utools
 const keys = useMagicKeys()
 const isMacOs = utools?.isMacOs() || false
@@ -277,9 +289,29 @@ function 重置数据() {
   Message.success({ content: '已重置', duration: 1000 })
 }
 
-// 手动切换主题
-function 变更主题(val) {
-  setTheme(val)
+const 主题选项 = [
+  {
+    value: 'auto',
+    label: '自动',
+    icon: 'i-fluent-dark-theme-24-filled'
+  },
+  {
+    value: 'dark',
+    label: '深色',
+    icon: 'i-ph-moon-bold'
+  },
+  {
+    value: 'light',
+    label: '浅色',
+    icon: 'i-ph-sun-bold'
+  }
+]
+const 主题图标 = computed(
+  () => 主题选项.find(项 => 项.value === 主题偏好.value)?.icon
+)
+
+function 选择主题(值) {
+  主题偏好.value = 值
 }
 
 const 时间戳类型 = useStorage('defaultUnit', 'ms') // 单选框值，默认毫秒
@@ -393,6 +425,7 @@ const utoolsInit = () => {
   })
   utools.subInputBlur()
   时间戳类型.value = utools.dbStorage.getItem('defaultUnit') || 'ms'
+  同步主题偏好()
 }
 
 watch(
