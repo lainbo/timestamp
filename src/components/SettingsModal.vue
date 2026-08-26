@@ -5,6 +5,7 @@
     title-align="start"
     fullscreen
     unmount-on-close
+    modal-animation-name="zoom-rb"
     :modal-class="['settings-modal', 是Mac ? 'is-mac' : '']"
     @open="同步草稿"
   >
@@ -125,6 +126,28 @@ function 重置() {
 </script>
 
 <style lang="scss">
+.zoom-rb-enter-from,
+.zoom-rb-appear-from,
+.zoom-rb-leave-to {
+  transform: scale(0, 0);
+  opacity: 0.1;
+}
+
+.zoom-rb-enter-to,
+.zoom-rb-appear-to,
+.zoom-rb-leave-from {
+  transform: scale(1, 1);
+  transform-origin: 100% 100%;
+  opacity: 1;
+}
+
+.zoom-rb-enter-active,
+.zoom-rb-appear-active,
+.zoom-rb-leave-active {
+  transform-origin: 100% 100%;
+  transition: all 0.35s var(--ani-bezier);
+}
+
 .settings-modal.arco-modal {
   border-radius: 0 !important;
 }
@@ -186,20 +209,24 @@ function 重置() {
     overflow: auto;
   }
 }
+</style>
 
+<style lang="scss" scoped>
 .settings-layout {
+  --timezone-view-min-height: 300px;
+  --settings-gap: 30px;
   display: flex;
   flex: 1 0 auto;
   flex-direction: column;
-  gap: 30px;
+  gap: var(--settings-gap);
   min-height: 100%;
 }
 
 .timezone-block {
   display: flex;
-  flex: 1 0 280px;
+  flex: 1 0 calc(var(--timezone-view-min-height) + var(--settings-gap));
   flex-direction: column;
-  min-height: 280px;
+  min-height: calc(var(--timezone-view-min-height) + var(--settings-gap));
 }
 
 .timezone-label {
@@ -208,36 +235,36 @@ function 重置() {
   color: var(--color-text-2);
 }
 
-.timezone-transfer.arco-transfer {
+.timezone-transfer {
   align-items: stretch;
   flex: 1 1 0;
   width: 100%;
   min-height: 0;
-}
 
-.timezone-transfer .arco-transfer-operations {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
+  :deep(.arco-transfer-operations) {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
 
-.timezone-transfer .arco-transfer-view {
-  flex: 1;
-  width: auto;
-  height: 100%;
-  min-width: 0;
-  min-height: 0;
-}
+  :deep(.arco-transfer-view) {
+    flex: 1;
+    width: auto;
+    height: 100%;
+    min-width: 0;
+    min-height: var(--timezone-view-min-height);
+  }
 
-.timezone-transfer .arco-transfer-view-body {
-  min-height: 0;
+  :deep(.arco-transfer-view-body) {
+    min-height: 0;
+  }
 }
 
 .settings-form {
   flex-shrink: 0;
 
-  .arco-form-item {
-    margin-bottom: 30px;
+  :deep(.arco-form-item) {
+    margin-bottom: var(--settings-gap);
 
     &:last-child {
       margin-bottom: 0;
