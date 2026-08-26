@@ -256,6 +256,7 @@ function 重置数据() {
   formData.date = ''
   formData.time = undefined
   时间戳类型.value = 'ms'
+  已选时区.value = [...默认已选时区]
   时区.value = 回退当前时区(已选时区.value, 'Asia/Shanghai')
   按钮停止状态.value = false
   更新当前时间戳()

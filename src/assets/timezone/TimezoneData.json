@@ -1,98 +1,46 @@
 [
   {
-    "name": "国际换日线",
-    "value": "Etc/GMT+12"
-  },
-  {
-    "name": "协调世界时-11",
-    "value": "Etc/GMT+11"
-  },
-  {
-    "name": "檀香山",
-    "value": "Pacific/Honolulu"
-  },
-  {
-    "name": "安克雷奇",
-    "value": "America/Anchorage"
-  },
-  {
-    "name": "太平洋时间",
+    "name": "洛杉矶",
     "value": "America/Los_Angeles"
   },
   {
-    "name": "北美山地时间",
-    "value": "America/Denver"
-  },
-  {
-    "name": "北美中部时间",
+    "name": "芝加哥",
     "value": "America/Chicago"
   },
   {
-    "name": "北美东部时间",
+    "name": "纽约",
     "value": "America/New_York"
   },
   {
-    "name": "圣地亚哥",
-    "value": "America/Santiago"
-  },
-  {
-    "name": "布宜诺斯艾利斯",
-    "value": "America/Argentina/Buenos_Aires"
-  },
-  {
-    "name": "协调世界时-2",
-    "value": "Etc/GMT+2"
-  },
-  {
-    "name": "佛得角群岛",
-    "value": "Atlantic/Cape_Verde"
+    "name": "圣保罗",
+    "value": "America/Sao_Paulo"
   },
   {
     "name": "协调世界时",
-    "value": "Etc/GMT"
+    "value": "Etc/UTC"
   },
   {
-    "name": "中非西部",
-    "value": "Africa/Lagos"
+    "name": "伦敦",
+    "value": "Europe/London"
   },
   {
-    "name": "开罗",
-    "value": "Africa/Cairo"
+    "name": "巴黎",
+    "value": "Europe/Paris"
   },
   {
-    "name": "巴格达",
-    "value": "Asia/Baghdad"
+    "name": "莫斯科",
+    "value": "Europe/Moscow"
   },
   {
-    "name": "第比利斯",
-    "value": "Asia/Tbilisi"
-  },
-  {
-    "name": "喀布尔",
-    "value": "Asia/Kabul"
-  },
-  {
-    "name": "伊斯兰堡",
-    "value": "Asia/Karachi"
+    "name": "迪拜",
+    "value": "Asia/Dubai"
   },
   {
     "name": "新德里",
     "value": "Asia/Kolkata"
   },
   {
-    "name": "加德满都",
-    "value": "Asia/Kathmandu"
-  },
-  {
-    "name": "达卡",
-    "value": "Asia/Dhaka"
-  },
-  {
-    "name": "仰光",
-    "value": "Asia/Yangon"
-  },
-  {
-    "name": "河内",
+    "name": "曼谷",
     "value": "Asia/Bangkok"
   },
   {
@@ -100,27 +48,31 @@
     "value": "Asia/Shanghai"
   },
   {
+    "name": "香港",
+    "value": "Asia/Hong_Kong"
+  },
+  {
+    "name": "台北",
+    "value": "Asia/Taipei"
+  },
+  {
+    "name": "新加坡",
+    "value": "Asia/Singapore"
+  },
+  {
     "name": "东京",
     "value": "Asia/Tokyo"
   },
   {
-    "name": "阿德莱德",
-    "value": "Australia/Adelaide"
+    "name": "首尔",
+    "value": "Asia/Seoul"
   },
   {
-    "name": "墨尔本",
+    "name": "悉尼",
     "value": "Australia/Sydney"
   },
   {
-    "name": "所罗门群岛",
-    "value": "Pacific/Guadalcanal"
-  },
-  {
-    "name": "协调世界时+12",
-    "value": "Etc/GMT-12"
-  },
-  {
-    "name": "萨摩亚群岛",
-    "value": "Pacific/Apia"
+    "name": "奥克兰",
+    "value": "Pacific/Auckland"
   }
 ]

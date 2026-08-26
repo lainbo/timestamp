@@ -1,5 +1,6 @@
 import dayjs from 'dayjs'
 import TimezoneJson from '@/assets/timezone/TimezoneData.json'
+import 时区中文名表 from '@/assets/timezone/TimezoneNames.zh.json'
 import { 读取持久化, 写入持久化 } from '@/utils/persist.js'
 
 const 已选存储键 = 'selectedTimeZones'
@@ -18,16 +19,7 @@ function 运行时区清单() {
 }
 
 function 时区中文名(id) {
-  if (名称覆盖[id]) return 名称覆盖[id]
-  try {
-    const 片段 = new Intl.DateTimeFormat('zh-CN', {
-      timeZone: id,
-      timeZoneName: 'shortGeneric'
-    }).formatToParts(new Date())
-    return 片段.find(项 => 项.type === 'timeZoneName')?.value || id
-  } catch {
-    return id
-  }
+  return 名称覆盖[id] || 时区中文名表[id] || id
 }
 
 function 时区偏移(id) {
@@ -55,7 +47,7 @@ export function 构建时区选项() {
         name,
         utc偏移: 文字,
         分钟,
-        label: `${name}（${文字} / ${id}）`,
+        label: `${name}（${文字}，${id}）`,
         disabled: false
       }
     })
