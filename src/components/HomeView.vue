@@ -1,15 +1,15 @@
 <template>
   <div
-    class="contain w-screen h-screen flex flex-col items-center pt-8px bg-white dark:bg-#303133 relative"
+    class="contain main overflow-hidden px-21px pb-26px pt-6px w-screen h-screen flex flex-col items-center pt-8px bg-white dark:bg-#303133 relative"
   >
     <div
-      class="card p-32px pt-16px rounded-8px shadow-xl w-11/12 min-w-600px dark:shadow-#222 dark:shadow-lg"
+      class="card p-32px pt-16px rounded-8px size-full bg-white dark:bg-#242425a6 border border-solid border-#e9e9e9 dark:border-#3d3d3d"
     >
       <div class="mb-16px space-x-11px">
         <a-select
           v-model:model-value="时区"
           size="large"
-          :style="{ width: '345px' }"
+          :style="{ width: '380px' }"
           placeholder="请选择时区"
           allow-search
           :options="timezoneData"
@@ -40,7 +40,7 @@
           <a-form-item :label="`日期 → （${时区文字}）时间戳：`">
             <a-date-picker
               v-model="formData.date"
-              :style="{ width: '345px' }"
+              :style="{ width: '380px' }"
               show-time
               :time-picker-props="{
                 defaultValue: dayjs().startOf('day')
@@ -70,7 +70,7 @@
               v-model="formData.time"
               placeholder="请输入时间戳"
               allow-clear
-              :style="{ width: '345px' }"
+              :style="{ width: '380px' }"
             />
             <a-tooltip
               :content="`点击复制 / ${timeTextShortcut}`"
@@ -432,6 +432,14 @@ async function 复制(str = '') {
   // 等宽数字
   font-feature-settings: 'tnum';
   font-variant-numeric: tabular-nums;
+}
+
+.main {
+  background-image: linear-gradient(
+    to bottom,
+    var(--main-bg-color-01) 0%,
+    var(--main-bg-color-02) 50%
+  );
 }
 
 .icon {

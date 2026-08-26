@@ -35,10 +35,14 @@ body {
 
 :root {
   --ani-bezier: cubic-bezier(0.22, 0.58, 0.12, 0.98); // 动画曲线
+  --main-bg-color-01: #f4f4f4; // 主背景颜色01
+  --main-bg-color-02: transparent; // 主背景颜色02
 }
 
 body[arco-theme='dark'] {
   --arcoblue-6: 100, 108, 255;
+  --main-bg-color-01: transparent; // 主背景颜色01
+  --main-bg-color-02: transparent; // 主背景颜色02
 }
 
 // 渐显渐隐的效果
