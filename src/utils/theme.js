@@ -1,13 +1,12 @@
 import { useColorMode } from '@vueuse/core'
 import { ref, watch } from 'vue'
+import { 读取持久化, 写入持久化 } from '@/utils/persist.js'
 
 const 存储键 = 'defaultTheme'
 const 合法主题 = new Set(['auto', 'light', 'dark'])
 
 function 读取主题偏好() {
-  const 原始 = window.utools?.dbStorage
-    ? window.utools.dbStorage.getItem(存储键)
-    : localStorage.getItem(存储键)
+  const 原始 = 读取持久化(存储键, 'auto')
   return 合法主题.has(原始) ? 原始 : 'auto'
 }
 
@@ -31,13 +30,7 @@ export const 主题选项 = [
 
 export const 主题偏好 = ref(读取主题偏好())
 
-watch(主题偏好, 值 => {
-  if (window.utools?.dbStorage) {
-    window.utools.dbStorage.setItem(存储键, 值)
-    return
-  }
-  localStorage.setItem(存储键, 值)
-})
+watch(主题偏好, 值 => 写入持久化(存储键, 值))
 
 useColorMode({
   storageRef: 主题偏好,
