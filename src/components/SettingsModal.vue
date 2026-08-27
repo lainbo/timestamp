@@ -7,7 +7,7 @@
     unmount-on-close
     modal-animation-name="zoom-rb"
     :modal-class="['settings-modal', 是Mac ? 'is-mac' : '']"
-    @open="同步草稿"
+    @before-open="同步草稿"
   >
     <div class="settings-layout">
       <div class="timezone-block">
@@ -71,6 +71,7 @@
 import { Message } from '@arco-design/web-vue'
 import { reactive } from 'vue'
 import { 主题偏好, 主题选项 } from '@/utils/theme.js'
+import { 默认已选时区 } from '@/utils/timezone.js'
 
 const 是Mac = window.utools?.isMacOs() || false
 
@@ -121,7 +122,8 @@ function 取消() {
 function 重置() {
   emit('重置')
   草稿.单位 = 'ms'
-  草稿.已选 = [...已选时区.value]
+  // defineModel 的 prop 要到下一次渲染才更新，直接取默认值而非回读
+  草稿.已选 = [...默认已选时区]
 }
 </script>
 
