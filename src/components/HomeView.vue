@@ -167,6 +167,7 @@ import SmoothTransitionIcon from '@/components/SmoothTransitionIcon.vue'
 import { 同步主题偏好 } from '@/utils/theme.js'
 import {
   构建时区选项,
+  合法时区集合,
   默认已选时区,
   回退当前时区,
   读取已选时区,
@@ -239,14 +240,18 @@ whenever(keys[keyMappings.dynamicTimeStamp[isMacOs ? 'mac' : 'other']], () =>
 )
 
 const 时区 = useStorage('defaultTimeZone', 'Asia/Shanghai') // 默认时区
-const 全部时区选项 = 构建时区选项()
-const 合法时区 = new Set(全部时区选项.map(项 => 项.value))
+const 合法时区 = 合法时区集合()
 const 已选时区 = ref(读取已选时区(合法时区))
 时区.value = 回退当前时区(已选时区.value, 时区.value)
 const 设置可见 = ref(false)
-const timezoneData = computed(() =>
-  全部时区选项.filter(项 => 已选时区.value.includes(项.value))
-)
+const timezoneData = computed(() => 构建时区选项(已选时区.value))
+// 全量列表要为 ~420 个时区各算一次偏移，推迟到设置弹窗首次打开时构建
+const 全部时区选项 = ref([])
+watch(设置可见, 可见 => {
+  if (可见 && !全部时区选项.value.length) {
+    全部时区选项.value = 构建时区选项([...合法时区])
+  }
+})
 
 const 时区文字 = computed(() => {
   const 项 = timezoneData.value.find(item => item.value === 时区.value)
