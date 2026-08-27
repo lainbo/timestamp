@@ -1,6 +1,6 @@
 <template>
   <div
-    class="contain main overflow-hidden px-23px pb-28px pt-6px w-screen h-screen flex flex-col items-center pt-8px bg-white dark:bg-#303133 relative"
+    class="contain main overflow-hidden px-23px pb-28px pt-6px w-screen h-screen flex flex-col items-center bg-white dark:bg-#303133 relative"
   >
     <div
       class="card p-32px pt-16px rounded-8px size-full bg-white dark:bg-#242425a6 border border-solid border-#e9e9e9 dark:border-#3d3d3d"
