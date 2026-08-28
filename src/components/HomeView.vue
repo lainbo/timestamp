@@ -294,10 +294,8 @@ function 时间戳转毫秒(时间戳, 单位) {
 const timeStampText = computed(() => {
   if (!formData.date) return '-'
 
-  const 本地日期 = dayjs(formData.date)
-  if (!本地日期.isValid()) return '-'
-
-  const 时区日期 = 本地日期.tz(时区.value, true)
+  const 时区日期 = dayjs.tz(formData.date, 时区.value)
+  if (!时区日期.isValid()) return '-'
 
   const 毫秒 = 时区日期.valueOf()
 
