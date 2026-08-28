@@ -155,6 +155,9 @@
 import { Message } from '@arco-design/web-vue'
 import {
   useClipboard,
+  useDocumentVisibility,
+  useEventListener,
+  useIntervalFn,
   useMagicKeys,
   useRafFn,
   useStorage,
@@ -247,14 +250,23 @@ const 已选时区 = ref(读取已选时区(合法时区))
 时区.value = 回退当前时区(已选时区.value, 时区.value)
 const 设置可见 = ref(false)
 const 日期选择器可见 = ref(false)
-const timezoneData = computed(() => 构建时区选项(已选时区.value))
-// 全量列表要为 ~420 个时区各算一次偏移，推迟到设置弹窗首次打开时构建
+const 页面可见性 = useDocumentVisibility()
+const timezoneData = ref(构建时区选项(已选时区.value))
+// 全量列表要为 ~420 个时区各算一次偏移，仅在设置弹窗打开时刷新。
 const 全部时区选项 = ref([])
-watch(设置可见, 可见 => {
-  if (可见 && !全部时区选项.value.length) {
+
+function 刷新时区选项() {
+  if (页面可见性.value !== 'visible') return
+
+  timezoneData.value = 构建时区选项(已选时区.value)
+  if (设置可见.value) {
     全部时区选项.value = 构建时区选项([...合法时区])
   }
-})
+}
+
+watch([已选时区, 设置可见, 页面可见性], 刷新时区选项, { deep: true })
+useIntervalFn(刷新时区选项, 60_000)
+useEventListener(window, 'focus', 刷新时区选项)
 
 const 时区文字 = computed(() => {
   const 项 = timezoneData.value.find(item => item.value === 时区.value)
@@ -401,6 +413,7 @@ function 暂停开始按钮() {
 const timeInputRef = ref() // 文本输入框的dom
 const utoolsInit = () => {
   utools.onPluginEnter(({ code, payload }) => {
+    刷新时区选项()
     if (code === 'timeStamp') {
       formData.time = payload || 0
       timeInputRef.value.focus()
