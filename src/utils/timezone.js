@@ -59,6 +59,25 @@ export function 构建时区选项(ids) {
   return 选项
 }
 
+// +8 对不上 UTC+08:00 里的 +08，按偏移分钟精确匹配
+function 解析偏移分钟(词) {
+  const 规范化 = 词.trim().toLowerCase().replace(/\s+/g, '')
+  const 匹配 = 规范化.match(/^(?:utc|gmt)?([+-])(\d{1,2})(?::(\d{2}))?$/)
+  if (!匹配) return
+  const 时 = Number(匹配[2])
+  const 分 = Number(匹配[3] || 0)
+  if (时 > 14 || 分 > 59) return
+  return (匹配[1] === '-' ? -1 : 1) * (时 * 60 + 分)
+}
+
+export function 匹配时区选项(词, 项) {
+  const 查询 = 词.trim().toLowerCase()
+  if (!查询) return true
+  if (项.label.toLowerCase().includes(查询)) return true
+  const 分钟 = 解析偏移分钟(查询)
+  return 分钟 !== undefined && 项.分钟 === 分钟
+}
+
 export function 规范化已选(已选, 合法) {
   if (!Array.isArray(已选)) return [...默认已选时区]
   const 结果 = 已选.filter(id => 合法.has(id))

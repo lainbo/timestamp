@@ -10,23 +10,7 @@
     @before-open="同步草稿"
   >
     <div class="settings-layout">
-      <a-form class="settings-form" layout="vertical" :model="草稿">
-        <a-form-item label="默认时间戳单位">
-          <a-radio-group v-model="草稿.单位" type="button">
-            <a-radio value="ns">纳秒</a-radio>
-            <a-radio value="ms">毫秒</a-radio>
-            <a-radio value="s">秒</a-radio>
-          </a-radio-group>
-        </a-form-item>
-        <a-form-item label="主题">
-          <a-radio-group v-model="草稿.主题" type="button">
-            <a-radio v-for="项 in 主题选项" :key="项.value" :value="项.value">
-              <i :class="项.icon"></i>
-              {{ 项.label }}
-            </a-radio>
-          </a-radio-group>
-        </a-form-item>
-      </a-form>
+
       <div class="timezone-block">
         <div class="timezone-label">
           主页可选时区
@@ -48,7 +32,6 @@
               <i class="i-material-symbols-search-rounded"></i>
             </template>
           </a-input>
-          <a-checkbox v-model="只看已选">只看已选</a-checkbox>
         </div>
         <div class="timezone-list">
           <a-checkbox-group v-model="草稿.已选" class="timezone-grid">
@@ -71,6 +54,26 @@
           />
         </div>
       </div>
+
+      <a-divider></a-divider>
+
+      <a-form class="settings-form" layout="vertical" :model="草稿">
+        <a-form-item label="默认时间戳单位">
+          <a-radio-group v-model="草稿.单位" type="button">
+            <a-radio value="ns">纳秒</a-radio>
+            <a-radio value="ms">毫秒</a-radio>
+            <a-radio value="s">秒</a-radio>
+          </a-radio-group>
+        </a-form-item>
+        <a-form-item label="主题">
+          <a-radio-group v-model="草稿.主题" type="button">
+            <a-radio v-for="项 in 主题选项" :key="项.value" :value="项.value">
+              <i :class="项.icon"></i>
+              {{ 项.label }}
+            </a-radio>
+          </a-radio-group>
+        </a-form-item>
+      </a-form>
     </div>
     <template #footer>
       <div class="settings-footer">
@@ -99,7 +102,7 @@
 import { Message } from '@arco-design/web-vue'
 import { computed, reactive, ref } from 'vue'
 import { 主题偏好, 主题选项 } from '@/utils/theme.js'
-import { 默认已选时区 } from '@/utils/timezone.js'
+import { 默认已选时区, 匹配时区选项 } from '@/utils/timezone.js'
 
 const 是Mac = window.utools?.isMacOs() || false
 
@@ -122,7 +125,6 @@ const 草稿 = reactive({
 })
 
 const 搜索词 = ref('')
-const 只看已选 = ref(false)
 // 打开弹窗那一刻的已选快照：已选置顶但会话内不随勾选变化重排，避免手滑取消后找不到
 const 打开时已选 = ref(new Set())
 
@@ -135,18 +137,12 @@ const 排序选项 = computed(() => {
   return [...置顶, ...其余]
 })
 
-const 过滤后选项 = computed(() => {
-  const 词 = 搜索词.value.trim().toLowerCase()
-  const 已选集 = new Set(草稿.已选)
-  return 排序选项.value.filter(项 => {
-    if (只看已选.value && !已选集.has(项.value)) return false
-    return !词 || 项.label.toLowerCase().includes(词)
-  })
-})
+const 过滤后选项 = computed(() =>
+  排序选项.value.filter(项 => 匹配时区选项(搜索词.value, 项))
+)
 
 function 同步草稿() {
   搜索词.value = ''
-  只看已选.value = false
   草稿.已选 = [...已选时区.value]
   打开时已选.value = new Set(草稿.已选)
   草稿.单位 = 时间戳类型.value

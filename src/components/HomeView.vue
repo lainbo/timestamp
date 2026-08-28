@@ -12,6 +12,7 @@
           :style="{ width: '380px' }"
           placeholder="请选择时区"
           allow-search
+          :filter-option="匹配时区选项"
           :options="timezoneData"
           :virtual-list-props="{ height: 280 }"
         />
@@ -171,7 +172,8 @@ import {
   默认已选时区,
   回退当前时区,
   读取已选时区,
-  写入已选时区
+  写入已选时区,
+  匹配时区选项
 } from '@/utils/timezone.js'
 const utools = window?.utools
 const keys = useMagicKeys()
