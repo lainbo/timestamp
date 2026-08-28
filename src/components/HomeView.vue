@@ -5,7 +5,7 @@
     <div
       class="card p-32px pt-16px rounded-8px size-full bg-white dark:bg-#242425a6 border border-solid border-#e9e9e9 dark:border-#3d3d3d"
     >
-      <div class="mb-16px space-x-11px">
+      <div class="mb-16px">
         <a-select
           v-model:model-value="时区"
           size="large"
@@ -16,18 +16,6 @@
           :options="timezoneData"
           :virtual-list-props="{ height: 280 }"
         />
-        <span class="inline-block">
-          <a-popover title="注意">
-            <i
-              class="i-majesticons-exclamation-circle-line text-20px dark:text-white"
-            ></i>
-            <template #content>
-              <p>
-                时间戳本身不带时区。日期转时间戳时，会将输入视为所选时区的当地时间；反向转换时，会按所选时区显示，并自动处理夏令时
-              </p>
-            </template>
-          </a-popover>
-        </span>
       </div>
       <a-divider></a-divider>
 
@@ -90,7 +78,7 @@
           <a-divider />
 
           <a-form-item
-            :label="`当前时间戳${按钮停止状态 ? '（已暂停）' : ''}：`"
+            :label="`当前时间戳（${时间戳单位文字}）：`"
           >
             <div class="space-x-12px flex items-center flex-1">
               <div class="w-235px">
@@ -273,6 +261,9 @@ function 重置数据() {
 }
 
 const 时间戳类型 = useStorage('defaultUnit', 'ms') // 单选框值，默认毫秒
+const 时间戳单位文字 = computed(
+  () => ({ ns: '纳秒', ms: '毫秒', s: '秒' })[时间戳类型.value]
+)
 const 每秒毫秒数 = 1000n
 const 每毫秒纳秒数 = 1000000n
 const 日期最大毫秒数 = 8640000000000000n
@@ -307,6 +298,7 @@ const timeStampText = computed(() => {
   if (!本地日期.isValid()) return '-'
 
   const 时区日期 = 本地日期.tz(时区.value, true)
+
   const 毫秒 = 时区日期.valueOf()
 
   if (时间戳类型.value === 's') return 时区日期.unix().toString()
