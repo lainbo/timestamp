@@ -35,6 +35,7 @@
               v-model="formData.date"
               v-model:popup-visible="日期选择器可见"
               :style="{ width: '380px' }"
+              :trigger-props="{ contentClass: 'timestamp-date-picker-popup' }"
               show-time
               :show-now-btn="false"
               :time-picker-props="{
@@ -467,6 +468,15 @@ async function 复制(str = '') {
 </script>
 
 <style lang="scss" scoped>
+:global(.timestamp-date-picker-popup .arco-picker-footer) {
+  display: grid;
+  grid-template-columns: 1fr auto;
+}
+
+:global(.timestamp-date-picker-popup .arco-picker-footer-extra-wrapper) {
+  padding-left: 12px;
+}
+
 .contain,
 .card {
   transition: all 0.4s ease;
