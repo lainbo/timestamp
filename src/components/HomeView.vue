@@ -26,17 +26,29 @@
           layout="vertical"
           size="large"
         >
-          <a-form-item :label="`日期 → （${时区文字}）时间戳：`">
+          <a-form-item
+            :label="`日期（${日期时区文字}）→ 时间戳：`"
+            :validate-status="日期转换结果.错误 ? 'error' : undefined"
+            :help="日期转换结果.错误"
+          >
             <a-date-picker
               v-model="formData.date"
+              v-model:popup-visible="日期选择器可见"
               :style="{ width: '380px' }"
               show-time
+              :show-now-btn="false"
               :time-picker-props="{
                 defaultValue: dayjs().startOf('day')
               }"
-              format="YYYY-MM-DD HH:mm:ss"
-              value-format="YYYY-MM-DD HH:mm:ss"
-            />
+              :format="日期格式"
+              :value-format="日期格式"
+            >
+              <template #extra>
+                <a-button type="text" size="mini" @click="填入此刻">
+                  此刻
+                </a-button>
+              </template>
+            </a-date-picker>
             <a-tooltip
               :content="`点击复制 / ${timeStampShortcut}`"
               position="top"
@@ -53,7 +65,7 @@
 
           <a-divider />
 
-          <a-form-item :label="`时间戳 → （${时区文字}）日期`">
+          <a-form-item :label="`时间戳 → （${时间戳时区文字}）日期`">
             <a-input
               ref="timeInputRef"
               v-model="formData.time"
@@ -77,9 +89,7 @@
 
           <a-divider />
 
-          <a-form-item
-            :label="`当前时间戳（${时间戳单位文字}）：`"
-          >
+          <a-form-item :label="`当前时间戳（${时间戳单位文字}）：`">
             <div class="space-x-12px flex items-center flex-1">
               <div class="w-235px">
                 <a-tooltip
@@ -154,6 +164,7 @@ import { computed, onMounted, reactive, ref, watch } from 'vue'
 import SettingsModal from '@/components/SettingsModal.vue'
 import SmoothTransitionIcon from '@/components/SmoothTransitionIcon.vue'
 import { 同步主题偏好 } from '@/utils/theme.js'
+import { 日期格式, 规范化日期, 格式化时区日期 } from '@/utils/datetime.js'
 import {
   构建时区选项,
   合法时区集合,
@@ -234,6 +245,7 @@ const 合法时区 = 合法时区集合()
 const 已选时区 = ref(读取已选时区(合法时区))
 时区.value = 回退当前时区(已选时区.value, 时区.value)
 const 设置可见 = ref(false)
+const 日期选择器可见 = ref(false)
 const timezoneData = computed(() => 构建时区选项(已选时区.value))
 // 全量列表要为 ~420 个时区各算一次偏移，推迟到设置弹窗首次打开时构建
 const 全部时区选项 = ref([])
@@ -245,7 +257,7 @@ watch(设置可见, 可见 => {
 
 const 时区文字 = computed(() => {
   const 项 = timezoneData.value.find(item => item.value === 时区.value)
-  return 项 ? `${项.name} ${项.utc偏移}` : 时区.value
+  return 项?.name ?? 时区.value
 })
 
 function 重置数据() {
@@ -290,44 +302,69 @@ function 时间戳转毫秒(时间戳, 单位) {
   return undefined
 }
 
+const 日期转换结果 = computed(() => {
+  if (!formData.date) return {}
+
+  const 日期文字 = 规范化日期(formData.date)
+  if (!日期文字) return { 错误: '日期无效，请检查日期格式和年月日' }
+
+  const 日期 = dayjs.tz(日期文字, 时区.value)
+  const { 文字, utc偏移 } = 格式化时区日期(日期.valueOf(), 时区.value)
+  if (文字 !== 日期文字) {
+    return { 错误: '该当地时间不存在（夏令时切换）' }
+  }
+
+  return { 日期, utc偏移 }
+})
+
+const 日期时区文字 = computed(() =>
+  [时区文字.value, 日期转换结果.value.utc偏移].filter(Boolean).join(' ')
+)
+
 // 日期 → 时间戳后面的文字
 const timeStampText = computed(() => {
-  if (!formData.date) return '-'
+  const 日期 = 日期转换结果.value.日期
+  if (!日期) return '-'
 
-  const 时区日期 = dayjs.tz(formData.date, 时区.value)
-  if (!时区日期.isValid()) return '-'
+  const 毫秒 = 日期.valueOf()
 
-  const 毫秒 = 时区日期.valueOf()
-
-  if (时间戳类型.value === 's') return 时区日期.unix().toString()
+  if (时间戳类型.value === 's') return 日期.unix().toString()
   return 格式化时间戳(毫秒, 时间戳类型.value)
 })
 
-// 时间戳 → 日期后面的文字
-const timeText = computed(() => {
+const 时间戳转换结果 = computed(() => {
   const 输入文字 = String(formData.time ?? '').trim()
-  if (!/^-?\d+$/.test(输入文字)) return '-'
+  if (!/^-?\d+$/.test(输入文字)) return undefined
 
   try {
     const 毫秒 = 时间戳转毫秒(BigInt(输入文字), 时间戳类型.value)
     if (毫秒 === undefined || 毫秒 > 日期最大毫秒数 || 毫秒 < -日期最大毫秒数) {
-      return '-'
+      return undefined
     }
 
-    const 日期 = dayjs(Number(毫秒))
-    if (!日期.isValid()) return '-'
-
-    return 日期.tz(时区.value).format('YYYY-MM-DD HH:mm:ss')
+    return 格式化时区日期(Number(毫秒), 时区.value)
   } catch {
-    return '-'
+    return undefined
   }
 })
+
+const 时间戳时区文字 = computed(() =>
+  [时区文字.value, 时间戳转换结果.value?.utc偏移].filter(Boolean).join(' ')
+)
+
+// 时间戳 → 日期后面的文字
+const timeText = computed(() => 时间戳转换结果.value?.文字 ?? '-')
 
 // 两个输入框
 const formData = reactive({
   date: '', // 日期
   time: undefined // 时间戳
 })
+
+function 填入此刻() {
+  formData.date = 格式化时区日期(Date.now(), 时区.value).文字
+  日期选择器可见.value = false
+}
 
 onMounted(() => {
   if (!window?.utools) return
@@ -368,7 +405,13 @@ const utoolsInit = () => {
       timeInputRef.value.focus()
     }
     if (code === 'date') {
-      formData.date = dayjs(payload).format('YYYY-MM-DD HH:mm:ss')
+      formData.date = 规范化日期(payload)
+      if (!formData.date) {
+        Message.warning({
+          content: '日期无效，请检查日期格式和年月日',
+          duration: 2000
+        })
+      }
     }
   })
   utools.subInputBlur()
