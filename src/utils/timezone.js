@@ -49,7 +49,7 @@ export function 构建时区选项(ids) {
       name,
       utc偏移: 文字,
       分钟,
-      label: `${name}（${文字}，${id}）`,
+      label: `${name}（当前 ${文字}，${id}）`,
       disabled: false
     }
   })

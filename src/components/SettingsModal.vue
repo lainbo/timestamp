@@ -10,7 +10,6 @@
     @before-open="同步草稿"
   >
     <div class="settings-layout">
-
       <div class="timezone-block">
         <div class="timezone-label">
           主页可选时区
@@ -43,7 +42,7 @@
             >
               <span class="timezone-item-name">{{ 项.name }}</span>
               <span class="timezone-item-meta">
-                {{ 项.utc偏移 }} · {{ 项.value }}
+                当前 {{ 项.utc偏移 }} · {{ 项.value }}
               </span>
             </a-checkbox>
           </a-checkbox-group>
