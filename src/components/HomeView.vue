@@ -466,7 +466,7 @@ async function 复制(str = '') {
   }
 
   &:active {
-    color: #646cff;
+    color: #5b61ff;
   }
 }
 

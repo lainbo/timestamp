@@ -10,22 +10,6 @@
     @before-open="同步草稿"
   >
     <div class="settings-layout">
-      <div class="timezone-block">
-        <div class="timezone-label">时区列表</div>
-        <a-transfer
-          v-model="草稿.已选"
-          class="timezone-transfer"
-          :data="时区选项"
-          show-search
-          :title="['未选', '已选']"
-          :source-input-search-props="{
-            placeholder: '搜索未选时区'
-          }"
-          :target-input-search-props="{
-            placeholder: '搜索已选时区'
-          }"
-        />
-      </div>
       <a-form class="settings-form" layout="vertical" :model="草稿">
         <a-form-item label="默认时间戳单位">
           <a-radio-group v-model="草稿.单位" type="button">
@@ -43,6 +27,50 @@
           </a-radio-group>
         </a-form-item>
       </a-form>
+      <div class="timezone-block">
+        <div class="timezone-label">
+          主页可选时区
+          <span class="timezone-count">
+            已选 {{ 草稿.已选.length }} / {{ 时区选项.length }}
+          </span>
+        </div>
+        <div class="timezone-hint">
+          勾选的时区会出现在主页的时区下拉框里，至少保留一个
+        </div>
+        <div class="timezone-toolbar">
+          <a-input
+            v-model="搜索词"
+            class="timezone-search"
+            placeholder="搜索时区名称、UTC 偏移或 ID"
+            allow-clear
+          >
+            <template #prefix>
+              <i class="i-material-symbols-search-rounded"></i>
+            </template>
+          </a-input>
+          <a-checkbox v-model="只看已选">只看已选</a-checkbox>
+        </div>
+        <div class="timezone-list">
+          <a-checkbox-group v-model="草稿.已选" class="timezone-grid">
+            <a-checkbox
+              v-for="项 in 过滤后选项"
+              :key="项.value"
+              :value="项.value"
+              class="timezone-item"
+            >
+              <span class="timezone-item-name">{{ 项.name }}</span>
+              <span class="timezone-item-meta">
+                {{ 项.utc偏移 }} · {{ 项.value }}
+              </span>
+            </a-checkbox>
+          </a-checkbox-group>
+          <a-empty
+            v-if="!过滤后选项.length"
+            class="timezone-empty"
+            description="没有匹配的时区"
+          />
+        </div>
+      </div>
     </div>
     <template #footer>
       <div class="settings-footer">
@@ -69,13 +97,13 @@
 
 <script setup>
 import { Message } from '@arco-design/web-vue'
-import { reactive } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import { 主题偏好, 主题选项 } from '@/utils/theme.js'
 import { 默认已选时区 } from '@/utils/timezone.js'
 
 const 是Mac = window.utools?.isMacOs() || false
 
-defineProps({
+const props = defineProps({
   时区选项: {
     type: Array,
     required: true
@@ -93,8 +121,34 @@ const 草稿 = reactive({
   主题: 'auto'
 })
 
+const 搜索词 = ref('')
+const 只看已选 = ref(false)
+// 打开弹窗那一刻的已选快照：已选置顶但会话内不随勾选变化重排，避免手滑取消后找不到
+const 打开时已选 = ref(new Set())
+
+const 排序选项 = computed(() => {
+  const 置顶 = []
+  const 其余 = []
+  for (const 项 of props.时区选项) {
+    ;(打开时已选.value.has(项.value) ? 置顶 : 其余).push(项)
+  }
+  return [...置顶, ...其余]
+})
+
+const 过滤后选项 = computed(() => {
+  const 词 = 搜索词.value.trim().toLowerCase()
+  const 已选集 = new Set(草稿.已选)
+  return 排序选项.value.filter(项 => {
+    if (只看已选.value && !已选集.has(项.value)) return false
+    return !词 || 项.label.toLowerCase().includes(词)
+  })
+})
+
 function 同步草稿() {
+  搜索词.value = ''
+  只看已选.value = false
   草稿.已选 = [...已选时区.value]
+  打开时已选.value = new Set(草稿.已选)
   草稿.单位 = 时间戳类型.value
   草稿.主题 = 主题偏好.value
 }
@@ -215,51 +269,12 @@ function 重置() {
 
 <style lang="scss" scoped>
 .settings-layout {
-  --timezone-view-min-height: 300px;
   --settings-gap: 30px;
   display: flex;
   flex: 1 0 auto;
   flex-direction: column;
   gap: var(--settings-gap);
   min-height: 100%;
-}
-
-.timezone-block {
-  display: flex;
-  flex: 1 0 calc(var(--timezone-view-min-height) + var(--settings-gap));
-  flex-direction: column;
-  min-height: calc(var(--timezone-view-min-height) + var(--settings-gap));
-}
-
-.timezone-label {
-  flex-shrink: 0;
-  margin-bottom: 8px;
-  color: var(--color-text-2);
-}
-
-.timezone-transfer {
-  align-items: stretch;
-  flex: 1 1 0;
-  width: 100%;
-  min-height: 0;
-
-  :deep(.arco-transfer-operations) {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-  }
-
-  :deep(.arco-transfer-view) {
-    flex: 1;
-    width: auto;
-    height: 100%;
-    min-width: 0;
-    min-height: var(--timezone-view-min-height);
-  }
-
-  :deep(.arco-transfer-view-body) {
-    min-height: 0;
-  }
 }
 
 .settings-form {
@@ -272,6 +287,94 @@ function 重置() {
       margin-bottom: 0;
     }
   }
+}
+
+.timezone-block {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 340px;
+}
+
+.timezone-label {
+  display: flex;
+  flex-shrink: 0;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 4px;
+  color: var(--color-text-2);
+}
+
+.timezone-count {
+  font-size: 12px;
+  color: var(--color-text-3);
+}
+
+.timezone-hint {
+  flex-shrink: 0;
+  margin-bottom: 12px;
+  font-size: 12px;
+  color: var(--color-text-3);
+}
+
+.timezone-toolbar {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.timezone-search {
+  width: 320px;
+}
+
+.timezone-list {
+  flex: 1 1 0;
+  min-height: 0;
+  padding: 8px;
+  overflow: auto;
+  border: 1px solid var(--color-border-2);
+  border-radius: var(--border-radius-medium);
+}
+
+.timezone-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2px;
+}
+
+.timezone-item {
+  display: flex;
+  align-items: center;
+  margin-right: 0;
+  padding: 6px 10px;
+  border-radius: var(--border-radius-small);
+  transition: background-color 0.15s;
+
+  &:hover {
+    background-color: var(--color-fill-2);
+  }
+
+  &.arco-checkbox-checked {
+    background-color: var(--color-primary-light-1);
+  }
+
+  :deep(.arco-checkbox-label) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.timezone-item-meta {
+  margin-left: 8px;
+  font-size: 12px;
+  color: var(--color-text-3);
+}
+
+.timezone-empty {
+  padding: 40px 0;
 }
 
 .settings-footer {

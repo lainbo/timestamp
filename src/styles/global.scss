@@ -40,7 +40,8 @@ body {
 }
 
 body[arco-theme='dark'] {
-  --arcoblue-6: 100, 108, 255;
+  // Arco 深色下会对主题色做偏移，强制指定为深色主色 #6168fc（与 easy-translation 一致）
+  --arcoblue-6: 97, 104, 252;
   --main-bg-color-01: transparent; // 主背景颜色01
   --main-bg-color-02: transparent; // 主背景颜色02
 }

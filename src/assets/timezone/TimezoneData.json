@@ -1,7 +1,15 @@
 [
   {
+    "name": "檀香山",
+    "value": "Pacific/Honolulu"
+  },
+  {
     "name": "洛杉矶",
     "value": "America/Los_Angeles"
+  },
+  {
+    "name": "丹佛",
+    "value": "America/Denver"
   },
   {
     "name": "芝加哥",
@@ -28,6 +36,10 @@
     "value": "Europe/Paris"
   },
   {
+    "name": "开罗",
+    "value": "Africa/Cairo"
+  },
+  {
     "name": "莫斯科",
     "value": "Europe/Moscow"
   },
@@ -36,8 +48,16 @@
     "value": "Asia/Dubai"
   },
   {
+    "name": "卡拉奇",
+    "value": "Asia/Karachi"
+  },
+  {
     "name": "新德里",
     "value": "Asia/Kolkata"
+  },
+  {
+    "name": "达卡",
+    "value": "Asia/Dhaka"
   },
   {
     "name": "曼谷",
@@ -48,24 +68,8 @@
     "value": "Asia/Shanghai"
   },
   {
-    "name": "香港",
-    "value": "Asia/Hong_Kong"
-  },
-  {
-    "name": "台北",
-    "value": "Asia/Taipei"
-  },
-  {
-    "name": "新加坡",
-    "value": "Asia/Singapore"
-  },
-  {
     "name": "东京",
     "value": "Asia/Tokyo"
-  },
-  {
-    "name": "首尔",
-    "value": "Asia/Seoul"
   },
   {
     "name": "悉尼",
