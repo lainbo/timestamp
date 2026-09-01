@@ -53,17 +53,7 @@
           />
         </div>
       </div>
-
-      <a-divider></a-divider>
-
       <a-form class="settings-form" layout="vertical" :model="草稿">
-        <a-form-item label="默认时间戳单位">
-          <a-radio-group v-model="草稿.单位" type="button">
-            <a-radio value="ns">纳秒</a-radio>
-            <a-radio value="ms">毫秒</a-radio>
-            <a-radio value="s">秒</a-radio>
-          </a-radio-group>
-        </a-form-item>
         <a-form-item label="主题">
           <a-radio-group v-model="草稿.主题" type="button">
             <a-radio v-for="项 in 主题选项" :key="项.value" :value="项.value">
@@ -115,11 +105,9 @@ const props = defineProps({
 const emit = defineEmits(['重置'])
 const 可见 = defineModel('visible', { type: Boolean })
 const 已选时区 = defineModel('已选时区')
-const 时间戳类型 = defineModel('时间戳类型')
 
 const 草稿 = reactive({
   已选: [],
-  单位: 'ms',
   主题: 'auto'
 })
 
@@ -144,7 +132,6 @@ function 同步草稿() {
   搜索词.value = ''
   草稿.已选 = [...已选时区.value]
   打开时已选.value = new Set(草稿.已选)
-  草稿.单位 = 时间戳类型.value
   草稿.主题 = 主题偏好.value
 }
 
@@ -154,7 +141,6 @@ function 保存() {
     return false
   }
   已选时区.value = [...草稿.已选]
-  时间戳类型.value = 草稿.单位
   主题偏好.value = 草稿.主题
   return true
 }
@@ -170,7 +156,6 @@ function 取消() {
 
 function 重置() {
   emit('重置')
-  草稿.单位 = 'ms'
   // defineModel 的 prop 要到下一次渲染才更新，直接取默认值而非回读
   草稿.已选 = [...默认已选时区]
 }

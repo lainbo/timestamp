@@ -5,7 +5,12 @@
     <div
       class="card p-32px pt-16px rounded-8px size-full bg-white dark:bg-#242425a6 border border-solid border-#e9e9e9 dark:border-#3d3d3d"
     >
-      <div class="mb-16px">
+      <div class="mb-16px space-x-11px">
+        <a-radio-group v-model="时间戳类型" type="button" size="large">
+          <a-radio value="ns">纳秒</a-radio>
+          <a-radio value="ms">毫秒</a-radio>
+          <a-radio value="s">秒</a-radio>
+        </a-radio-group>
         <a-select
           v-model:model-value="时区"
           size="large"
@@ -144,7 +149,6 @@
     <SettingsModal
       v-model:visible="设置可见"
       v-model:已选时区="已选时区"
-      v-model:时间戳类型="时间戳类型"
       :时区选项="全部时区选项"
       @重置="重置数据"
     />
