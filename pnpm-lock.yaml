@@ -4,13 +4,16 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  '@arco-design/web-vue@2.58.0': a023cd840e6c0ca5c493b7b53a13acddaa06064ca618b2a1164436fd3fb7441b
+
 importers:
 
   .:
     dependencies:
       '@arco-design/web-vue':
         specifier: ^2.58.0
-        version: 2.58.0(vue@3.5.41)
+        version: 2.58.0(patch_hash=a023cd840e6c0ca5c493b7b53a13acddaa06064ca618b2a1164436fd3fb7441b)(vue@3.5.41)
       '@vueuse/core':
         specifier: ^14.4.0
         version: 14.4.0(vue@3.5.41)
@@ -1618,7 +1621,7 @@ snapshots:
     dependencies:
       color: 3.2.1
 
-  '@arco-design/web-vue@2.58.0(vue@3.5.41)':
+  '@arco-design/web-vue@2.58.0(patch_hash=a023cd840e6c0ca5c493b7b53a13acddaa06064ca618b2a1164436fd3fb7441b)(vue@3.5.41)':
     dependencies:
       '@arco-design/color': 0.4.0
       b-tween: 0.3.3

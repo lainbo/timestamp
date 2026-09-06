@@ -1,0 +1,62 @@
+diff --git a/es/date-picker/utils/index.js b/es/date-picker/utils/index.js
+index f17db7ba7bb7e851f78b56bd920e2affe4e5df85..089c1fd3cfa77e8514b1c5b0b19cb8176fc9a8b2 100644
+--- a/es/date-picker/utils/index.js
++++ b/es/date-picker/utils/index.js
+@@ -16,7 +16,9 @@ function isValidRangeValue(value) {
+ }
+ function mergeValueWithTime(defaultValue, dateValue, timeValue) {
+   const dateVal = dateValue || defaultValue;
+-  const timeVal = timeValue || defaultValue;
++  let timeVal = timeValue || defaultValue;
++  // UTC 面板值仅承载日期字段，合并前保留时分秒，避免系统夏令时改写。
++  if (dateVal.isUTC?.() || timeVal.isUTC?.()) timeVal = timeVal.utc(true);
+   return timeVal.set("year", dateVal.year()).set("month", dateVal.month()).set("date", dateVal.date());
+ }
+ function isDisabledDate(cellDate, disabledDate, mode = "date") {
+diff --git a/es/time-picker/panel.js b/es/time-picker/panel.js
+index 47ac4fc27e07eb5e800545a2c6500dbef716d1af..191e1bc36d01f06e25f6e425b3d6c0a4912ab14c 100644
+--- a/es/time-picker/panel.js
++++ b/es/time-picker/panel.js
+@@ -180,7 +180,10 @@ const _sfc_main = defineComponent({
+           newValue = `${newValue} ${ampm}`;
+         }
+       }
+-      newValue = dayjs(newValue, valueFormat);
++      // 沿用面板的 UTC 模式，避免在系统夏令时空缺时段重新按当地时间解析。
++      newValue = selectedValue.value?.isUTC?.()
++        ? dayjs.utc(newValue, valueFormat)
++        : dayjs(newValue, valueFormat);
+       emitSelect(newValue);
+     }
+     return {
+diff --git a/lib/date-picker/utils/index.js b/lib/date-picker/utils/index.js
+index 6b3ef6b44f66c91a141fa6bcc80bbdc7affac575..11b305d2f605f881d5832a24c9c51e9884541e53 100644
+--- a/lib/date-picker/utils/index.js
++++ b/lib/date-picker/utils/index.js
+@@ -18,7 +18,9 @@ function isValidRangeValue(value) {
+ }
+ function mergeValueWithTime(defaultValue, dateValue, timeValue) {
+   const dateVal = dateValue || defaultValue;
+-  const timeVal = timeValue || defaultValue;
++  let timeVal = timeValue || defaultValue;
++  // UTC 面板值仅承载日期字段，合并前保留时分秒，避免系统夏令时改写。
++  if (dateVal.isUTC?.() || timeVal.isUTC?.()) timeVal = timeVal.utc(true);
+   return timeVal.set("year", dateVal.year()).set("month", dateVal.month()).set("date", dateVal.date());
+ }
+ function isDisabledDate(cellDate, disabledDate, mode = "date") {
+diff --git a/lib/time-picker/panel.js b/lib/time-picker/panel.js
+index 86bdbfdd819f6254502c3e94a8776936c3aac67f..9c80defa6cc778de7e321f95cbbb54432413fab2 100644
+--- a/lib/time-picker/panel.js
++++ b/lib/time-picker/panel.js
+@@ -181,7 +181,10 @@ const _sfc_main = vue.defineComponent({
+           newValue = `${newValue} ${ampm}`;
+         }
+       }
+-      newValue = date.dayjs(newValue, valueFormat);
++      // 沿用面板的 UTC 模式，避免在系统夏令时空缺时段重新按当地时间解析。
++      newValue = selectedValue.value?.isUTC?.()
++        ? date.dayjs.utc(newValue, valueFormat)
++        : date.dayjs(newValue, valueFormat);
+       emitSelect(newValue);
+     }
+     return {

@@ -46,3 +46,5 @@ minimumReleaseAgeExclude:
   - sass-embedded@1.103.1
   - sass@1.103.1
   - unocss@66.8.1
+patchedDependencies:
+  '@arco-design/web-vue@2.58.0': patches/@arco-design__web-vue@2.58.0.patch
