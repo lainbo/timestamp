@@ -36,18 +36,51 @@
             :validate-status="日期转换结果.错误 ? 'error' : undefined"
             :help="日期转换结果.错误"
           >
+            <template v-if="日期候选.length === 2" #help>
+              <div class="ambiguous-time">
+                <span class="ambiguous-time-title">
+                  该当地时间因时钟回拨，会出现两次
+                </span>
+                <a-radio-group v-model="歧义选项">
+                  <a-radio v-for="(项, 序) in 日期候选" :key="序" :value="序">
+                    <template #radio="{ checked }">
+                      <div
+                        class="custom-radio-card"
+                        :class="{ 'custom-radio-card-checked': checked }"
+                      >
+                        <div class="custom-radio-card-mask">
+                          <div class="custom-radio-card-mask-dot" />
+                        </div>
+                        <div>
+                          <div class="custom-radio-card-title">
+                            {{ 序 === 0 ? '第一次' : '第二次' }}
+                          </div>
+                          <div class="custom-radio-card-text">
+                            {{ 项.utc偏移 }}
+                          </div>
+                        </div>
+                      </div>
+                    </template>
+                  </a-radio>
+                </a-radio-group>
+              </div>
+            </template>
             <a-date-picker
-              v-model="formData.date"
+              ref="日期选择器引用"
+              :model-value="日期面板值"
               v-model:popup-visible="日期选择器可见"
               :style="{ width: '380px' }"
               :trigger-props="{ contentClass: 'timestamp-date-picker-popup' }"
               show-time
               :show-now-btn="false"
               :time-picker-props="{
-                defaultValue: dayjs().startOf('day')
+                defaultValue: dayjs().utc(true).startOf('day')
               }"
               :format="日期格式"
               :value-format="日期格式"
+              @input.capture.stop="接管手输"
+              @update:model-value="接收面板日期"
+              @select="手输中 = false"
             >
               <template #extra>
                 <a-button type="text" size="mini" @click="填入此刻">
@@ -168,11 +201,16 @@ import {
   whenever
 } from '@vueuse/core'
 import dayjs from 'dayjs'
-import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
 import SettingsModal from '@/components/SettingsModal.vue'
 import SmoothTransitionIcon from '@/components/SmoothTransitionIcon.vue'
 import { 同步主题偏好 } from '@/utils/theme.js'
-import { 日期格式, 规范化日期, 格式化时区日期 } from '@/utils/datetime.js'
+import {
+  日期格式,
+  规范化日期,
+  格式化时区日期,
+  解析时区日期
+} from '@/utils/datetime.js'
 import {
   构建时区选项,
   合法时区集合,
@@ -319,19 +357,23 @@ function 时间戳转毫秒(时间戳, 单位) {
   return undefined
 }
 
+const 歧义选项 = ref(0)
+
+const 日期候选 = computed(() => {
+  const 日期文字 = 规范化日期(formData.date)
+  return 日期文字 ? 解析时区日期(日期文字, 时区.value) : []
+})
+
 const 日期转换结果 = computed(() => {
   if (!formData.date) return {}
+  if (!规范化日期(formData.date))
+    return { 错误: '日期无效，请检查日期格式和年月日' }
 
-  const 日期文字 = 规范化日期(formData.date)
-  if (!日期文字) return { 错误: '日期无效，请检查日期格式和年月日' }
+  const 候选 = 日期候选.value
+  if (!候选.length) return { 错误: '该当地时间不存在（夏令时切换）' }
 
-  const 日期 = dayjs.tz(日期文字, 时区.value)
-  const { 文字, utc偏移 } = 格式化时区日期(日期.valueOf(), 时区.value)
-  if (文字 !== 日期文字) {
-    return { 错误: '该当地时间不存在（夏令时切换）' }
-  }
-
-  return { 日期, utc偏移 }
+  const 选中 = 候选[候选.length === 2 ? 歧义选项.value : 0]
+  return { 毫秒: 选中.毫秒, utc偏移: 选中.utc偏移 }
 })
 
 const 日期时区文字 = computed(() =>
@@ -340,12 +382,10 @@ const 日期时区文字 = computed(() =>
 
 // 日期 → 时间戳后面的文字
 const timeStampText = computed(() => {
-  const 日期 = 日期转换结果.value.日期
-  if (!日期) return '-'
+  const 毫秒 = 日期转换结果.value.毫秒
+  if (毫秒 === undefined) return '-'
 
-  const 毫秒 = 日期.valueOf()
-
-  if (时间戳类型.value === 's') return 日期.unix().toString()
+  if (时间戳类型.value === 's') return Math.floor(毫秒 / 1000).toString()
   return 格式化时间戳(毫秒, 时间戳类型.value)
 })
 
@@ -378,10 +418,45 @@ const formData = reactive({
   time: undefined // 时间戳
 })
 
+// UTC 模式仅用于面板保存年月日和时分秒；实际时间戳仍按所选时区解析。
+const 日期面板值 = computed(() => {
+  const 日期文字 = 规范化日期(formData.date)
+  return 日期文字 ? dayjs.utc(日期文字, 日期格式, true) : undefined
+})
+
 function 填入此刻() {
   formData.date = 格式化时区日期(Date.now(), 时区.value).文字
   日期选择器可见.value = false
 }
+
+const 日期选择器引用 = ref()
+let 输入框元素 = null
+const 手输中 = ref(false)
+
+// 在捕获阶段保存原文，阻止 Arco 按系统时区重新解析手输日期。
+function 接管手输(事件) {
+  手输中.value = true
+  输入框元素 = 事件.target
+  formData.date = 事件.target.value
+}
+
+// 确认按钮可能仍携带上一次面板选择；手输后只接收新的面板点选或清空。
+function 接收面板日期(日期) {
+  if (!手输中.value || 日期 === undefined) formData.date = 日期 ?? ''
+}
+
+watch([() => formData.date, 时区], () => {
+  歧义选项.value = 0
+})
+
+// 面板只接收有效日期，输入和弹层切换后保留手输的格式及未完成文本。
+watch([() => formData.date, 日期选择器可见], () => {
+  nextTick(() => {
+    const 输入框 =
+      输入框元素 ?? 日期选择器引用.value?.$el?.querySelector('input')
+    if (输入框 && 输入框.value !== formData.date) 输入框.value = formData.date
+  })
+})
 
 onMounted(() => {
   if (!window?.utools) return
@@ -502,6 +577,92 @@ async function 复制(str = '') {
   // 等宽数字
   font-feature-settings: 'tnum';
   font-variant-numeric: tabular-nums;
+}
+
+.ambiguous-time {
+  display: grid;
+  gap: 8px;
+}
+
+.ambiguous-time-title {
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--color-text-3);
+}
+
+.ambiguous-time :deep(.arco-radio-group) {
+  display: grid;
+  grid-template-columns: repeat(2, max-content);
+  gap: 8px;
+}
+
+.ambiguous-time :deep(.arco-radio) {
+  padding-left: 0 !important;
+}
+
+.custom-radio-card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 168px;
+  padding: 7px 9px;
+  border: 1px solid var(--color-border-2);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.custom-radio-card-mask {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 12px;
+  height: 12px;
+  border: 1px solid var(--color-border-2);
+  border-radius: 100%;
+  box-sizing: border-box;
+}
+
+.custom-radio-card-mask-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 100%;
+}
+
+.custom-radio-card-title {
+  margin-bottom: 2px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+  color: var(--color-text-1);
+}
+
+.custom-radio-card-text {
+  font-size: 11px;
+  line-height: 15px;
+  color: var(--color-text-3);
+  font-feature-settings: 'tnum';
+  font-variant-numeric: tabular-nums;
+}
+
+.custom-radio-card:hover,
+.custom-radio-card-checked,
+.custom-radio-card:hover .custom-radio-card-mask,
+.custom-radio-card-checked .custom-radio-card-mask {
+  border-color: rgb(var(--primary-6));
+}
+
+.custom-radio-card:hover .custom-radio-card-title,
+.custom-radio-card-checked .custom-radio-card-title {
+  color: rgb(var(--primary-6));
+}
+
+.custom-radio-card-checked {
+  background-color: var(--color-primary-light-1);
+}
+
+.custom-radio-card-checked .custom-radio-card-mask-dot {
+  background-color: rgb(var(--primary-6));
 }
 
 .main {
