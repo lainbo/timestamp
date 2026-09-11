@@ -424,9 +424,14 @@ const 日期面板值 = computed(() => {
   return 日期文字 ? dayjs.utc(日期文字, 日期格式, true) : undefined
 })
 
-function 填入此刻() {
-  formData.date = 格式化时区日期(Date.now(), 时区.value).文字
+async function 填入此刻() {
+  const 此刻毫秒 = Math.floor(Date.now() / 1000) * 1000
+  formData.date = 格式化时区日期(此刻毫秒, 时区.value).文字
   日期选择器可见.value = false
+
+  // 等待日期监听重置选项后，再选中此刻对应的那次当地时间。
+  await nextTick()
+  歧义选项.value = 日期候选.value[1]?.毫秒 === 此刻毫秒 ? 1 : 0
 }
 
 const 日期选择器引用 = ref()
