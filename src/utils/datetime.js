@@ -46,9 +46,12 @@ function 取时区偏移(毫秒, 时区) {
   })
     .formatToParts(毫秒)
     .find(part => part.type === 'timeZoneName')?.value
-  const 匹配 = 名称?.match(/^GMT([+-])(\d{1,2}):(\d{2})$/)
+  const 匹配 = 名称?.match(/^GMT([+-])(\d{1,2}):(\d{2})(?::(\d{2}))?$/)
   if (!匹配) return 0
-  return (匹配[1] === '-' ? -1 : 1) * (Number(匹配[2]) * 60 + Number(匹配[3]))
+  return (
+    (匹配[1] === '-' ? -1 : 1) *
+    (Number(匹配[2]) * 3600 + Number(匹配[3]) * 60 + Number(匹配[4] ?? 0))
+  )
 }
 
 // 枚举墙钟时间在某时区对应的所有瞬时：0 个表示该当地时间不存在，
@@ -65,11 +68,11 @@ export function 解析时区日期(文字, 时区) {
   )
 
   const 候选 = []
-  for (const 分钟 of 偏移集合) {
-    const 瞬时 = 基准 - 分钟 * 60_000
+  for (const 秒 of 偏移集合) {
+    const 瞬时 = 基准 - 秒 * 1000
     const 结果 = 格式化时区日期(瞬时, 时区)
     if (结果.文字 === 文字) {
-      候选.push({ 毫秒: 瞬时, 偏移分钟: 分钟, utc偏移: 结果.utc偏移 })
+      候选.push({ 毫秒: 瞬时, 偏移秒: 秒, utc偏移: 结果.utc偏移 })
     }
   }
   候选.sort((a, b) => a.毫秒 - b.毫秒)
