@@ -18,6 +18,7 @@ export function 规范化日期(输入) {
 export function 格式化时区日期(毫秒, 时区) {
   const 格式器 = new Intl.DateTimeFormat('en-US', {
     timeZone: 时区,
+    era: 'short',
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
@@ -27,13 +28,13 @@ export function 格式化时区日期(毫秒, 时区) {
     hourCycle: 'h23',
     timeZoneName: 'longOffset'
   })
-  const { year, month, day, hour, minute, second, timeZoneName } =
+  const { era, year, month, day, hour, minute, second, timeZoneName } =
     Object.fromEntries(
       格式器.formatToParts(毫秒).map(({ type, value }) => [type, value])
     )
 
   return {
-    文字: `${year.padStart(4, '0')}-${month}-${day} ${hour}:${minute}:${second}`,
+    文字: `${era === 'BC' ? '公元前 ' : ''}${year.padStart(4, '0')}-${month}-${day} ${hour}:${minute}:${second}`,
     utc偏移:
       timeZoneName === 'GMT' ? 'UTC+00:00' : timeZoneName.replace('GMT', 'UTC')
   }
