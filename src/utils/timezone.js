@@ -36,7 +36,14 @@ function 时区偏移(id) {
 
 export function 合法时区集合() {
   const 集合 = new Set(运行时区清单())
-  for (const id of 默认已选时区) 集合.add(id)
+  // 运行时清单可能只列出默认时区的规范名（如 Asia/Kolkata 对应 Asia/Calcutta），
+  // 换成默认列表的写法，避免同一时区出现两次。
+  for (const id of 默认已选时区) {
+    集合.delete(
+      new Intl.DateTimeFormat('en', { timeZone: id }).resolvedOptions().timeZone
+    )
+    集合.add(id)
+  }
   return 集合
 }
 
