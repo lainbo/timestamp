@@ -204,7 +204,6 @@ import dayjs from 'dayjs'
 import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
 import SettingsModal from '@/components/SettingsModal.vue'
 import SmoothTransitionIcon from '@/components/SmoothTransitionIcon.vue'
-import { 同步主题偏好 } from '@/utils/theme.js'
 import {
   日期格式,
   解析日期,
@@ -514,12 +513,10 @@ const utoolsInit = () => {
   utools.subInputBlur()
   时间戳类型.value =
     utools.dbStorage.getItem('defaultUnit') || 时间戳类型.value || 'ms'
-  已选时区.value = 读取已选时区(合法时区)
   时区.value = 回退当前时区(
     已选时区.value,
     utools.dbStorage.getItem('defaultTimeZone') ?? 时区.value
   )
-  同步主题偏好()
 }
 
 watch(

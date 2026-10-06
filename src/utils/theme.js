@@ -43,7 +43,3 @@ useColorMode({
     document.body.removeAttribute('arco-theme')
   }
 })
-
-export function 同步主题偏好() {
-  主题偏好.value = 读取主题偏好()
-}
