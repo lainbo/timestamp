@@ -223,67 +223,21 @@ const utools = window?.utools
 const keys = useMagicKeys()
 const isMacOs = utools?.isMacOs() || false
 
-// 定义快捷键，内部使用 'Meta'，外部展示 'Command'
-const keyMappings = {
-  timeStamp: {
-    mac: 'Meta+Shift+Z',
-    other: 'Ctrl+Shift+Z'
-  },
-  timeText: {
-    mac: 'Meta+Shift+X',
-    other: 'Ctrl+Shift+X'
-  },
-  dynamicTimeStamp: {
-    mac: 'Meta+Shift+C',
-    other: 'Ctrl+Shift+C'
-  }
-}
+// useMagicKeys 识别 Meta，提示文字在 Mac 上写作 Command
+const 修饰键 = isMacOs ? 'Meta' : 'Ctrl'
+const 提示修饰键 = isMacOs ? 'Command' : 'Ctrl'
 
-// 显示给用户的快捷键，Mac 上使用 'Command' 替代 'Meta'
-const displayKeyMappings = {
-  timeStamp: {
-    mac: 'Command+Shift+Z',
-    other: 'Ctrl+Shift+Z'
-  },
-  timeText: {
-    mac: 'Command+Shift+X',
-    other: 'Ctrl+Shift+X'
-  },
-  dynamicTimeStamp: {
-    mac: 'Command+Shift+C',
-    other: 'Ctrl+Shift+C'
-  }
-}
+// 日期 → 时间戳
+const timeStampShortcut = `${提示修饰键}+Shift+Z`
+whenever(keys[`${修饰键}+Shift+Z`], () => 复制(timeStampText.value))
 
-// 日期 → 时间戳后面的快捷键提示
-const timeStampShortcut = computed(() =>
-  isMacOs
-    ? displayKeyMappings.timeStamp.mac
-    : displayKeyMappings.timeStamp.other
-)
+// 时间戳 → 日期
+const timeTextShortcut = `${提示修饰键}+Shift+X`
+whenever(keys[`${修饰键}+Shift+X`], () => 复制(timeText.value))
 
-// 时间戳 → 日期后面的快捷键提示
-const timeTextShortcut = computed(() =>
-  isMacOs ? displayKeyMappings.timeText.mac : displayKeyMappings.timeText.other
-)
-
-// 底部动态时间戳后面的快捷键提示
-const dynamicTimeStampShortcut = computed(() =>
-  isMacOs
-    ? displayKeyMappings.dynamicTimeStamp.mac
-    : displayKeyMappings.dynamicTimeStamp.other
-)
-
-// 快捷键绑定
-whenever(keys[keyMappings.timeStamp[isMacOs ? 'mac' : 'other']], () =>
-  复制(timeStampText.value)
-)
-whenever(keys[keyMappings.timeText[isMacOs ? 'mac' : 'other']], () =>
-  复制(timeText.value)
-)
-whenever(keys[keyMappings.dynamicTimeStamp[isMacOs ? 'mac' : 'other']], () =>
-  复制(底部动态时间戳.value)
-)
+// 当前时间戳
+const dynamicTimeStampShortcut = `${提示修饰键}+Shift+C`
+whenever(keys[`${修饰键}+Shift+C`], () => 复制(底部动态时间戳.value))
 
 const 时区 = useStorage('defaultTimeZone', 'Asia/Shanghai') // 默认时区
 const 合法时区 = 合法时区集合()
@@ -531,12 +485,6 @@ watch(
 watch(
   已选时区,
   值 => {
-    if (!值.length) {
-      已选时区.value = 合法时区.has(时区.value)
-        ? [时区.value]
-        : [...默认已选时区]
-      return
-    }
     写入已选时区(值)
     时区.value = 回退当前时区(值, 时区.value)
   },
