@@ -352,8 +352,7 @@ function 纳秒转毫秒(纳秒) {
 function 时间戳转毫秒(时间戳, 单位) {
   if (单位 === 's') return 时间戳 * 每秒毫秒数
   if (单位 === 'ms') return 时间戳
-  if (单位 === 'ns') return 纳秒转毫秒(时间戳)
-  return undefined
+  return 纳秒转毫秒(时间戳)
 }
 
 const 歧义选项 = ref(0)
@@ -371,8 +370,7 @@ const 日期转换结果 = computed(() => {
   const 候选 = 日期候选.value
   if (!候选.length) return { 错误: '该当地时间不存在（夏令时切换）' }
 
-  const 选中 = 候选[候选.length === 2 ? 歧义选项.value : 0]
-  return { 毫秒: 选中.毫秒, utc偏移: 选中.utc偏移 }
+  return 候选[候选.length === 2 ? 歧义选项.value : 0]
 })
 
 const 日期时区文字 = computed(() =>
@@ -384,7 +382,6 @@ const timeStampText = computed(() => {
   const 毫秒 = 日期转换结果.value.毫秒
   if (毫秒 === undefined) return '-'
 
-  if (时间戳类型.value === 's') return Math.floor(毫秒 / 1000).toString()
   return 格式化时间戳(毫秒, 时间戳类型.value)
 })
 
@@ -392,16 +389,10 @@ const 时间戳转换结果 = computed(() => {
   const 输入文字 = String(formData.time ?? '').trim()
   if (!/^-?\d+$/.test(输入文字)) return undefined
 
-  try {
-    const 毫秒 = 时间戳转毫秒(BigInt(输入文字), 时间戳类型.value)
-    if (毫秒 === undefined || 毫秒 > 日期最大毫秒数 || 毫秒 < -日期最大毫秒数) {
-      return undefined
-    }
+  const 毫秒 = 时间戳转毫秒(BigInt(输入文字), 时间戳类型.value)
+  if (毫秒 > 日期最大毫秒数 || 毫秒 < -日期最大毫秒数) return undefined
 
-    return 格式化时区日期(Number(毫秒), 时区.value)
-  } catch {
-    return undefined
-  }
+  return 格式化时区日期(Number(毫秒), 时区.value)
 })
 
 const 时间戳时区文字 = computed(() =>
