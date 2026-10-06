@@ -9,13 +9,7 @@ const 名称覆盖 = Object.fromEntries(TimezoneJson.map(项 => [项.value, 项.
 export const 默认已选时区 = TimezoneJson.map(项 => 项.value)
 
 function 运行时区清单() {
-  if (
-    typeof Intl === 'undefined' ||
-    typeof Intl.supportedValuesOf !== 'function'
-  ) {
-    return []
-  }
-  return Intl.supportedValuesOf('timeZone')
+  return Intl.supportedValuesOf?.('timeZone') ?? []
 }
 
 function 时区中文名(id) {
@@ -23,14 +17,10 @@ function 时区中文名(id) {
 }
 
 function 时区偏移(id) {
-  try {
-    const 实例 = dayjs().tz(id)
-    return {
-      分钟: 实例.utcOffset(),
-      文字: `UTC${实例.format('Z')}`
-    }
-  } catch {
-    return { 分钟: 0, 文字: 'UTC' }
+  const 实例 = dayjs().tz(id)
+  return {
+    分钟: 实例.utcOffset(),
+    文字: `UTC${实例.format('Z')}`
   }
 }
 
@@ -56,8 +46,7 @@ export function 构建时区选项(ids) {
       name,
       utc偏移: 文字,
       分钟,
-      label: `${name}（当前 ${文字}，${id}）`,
-      disabled: false
+      label: `${name}（当前 ${文字}，${id}）`
     }
   })
   选项.sort(
