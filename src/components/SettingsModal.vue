@@ -80,7 +80,7 @@
         </a-popconfirm>
         <div class="settings-footer-actions">
           <a-button @click="取消">取消</a-button>
-          <a-button type="primary" @click="确认保存">保存</a-button>
+          <a-button type="primary" @click="保存">保存</a-button>
         </div>
       </div>
     </template>
@@ -138,15 +138,10 @@ function 同步草稿() {
 function 保存() {
   if (!草稿.已选.length) {
     Message.warning({ content: '至少保留一个时区', duration: 1000 })
-    return false
+    return
   }
   已选时区.value = [...草稿.已选]
   主题偏好.value = 草稿.主题
-  return true
-}
-
-function 确认保存() {
-  if (保存() === false) return
   可见.value = false
 }
 
@@ -300,8 +295,6 @@ function 重置() {
 .timezone-toolbar {
   display: flex;
   flex-shrink: 0;
-  align-items: center;
-  gap: 16px;
   margin-bottom: 12px;
 }
 
