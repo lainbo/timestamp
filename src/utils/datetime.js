@@ -1,18 +1,35 @@
-import dayjs from 'dayjs'
-
 export const 日期格式 = 'YYYY-MM-DD HH:mm:ss'
 
-export function 规范化日期(输入) {
+const 补零 = 值 => 值.padStart(2, '0')
+
+// 返回规范化的日期文字，以及把它当作 UTC 墙钟时间得到的毫秒数；非法日期返回 undefined。
+export function 解析日期(输入) {
   const 匹配 = String(输入 ?? '')
     .trim()
     .match(/^(\d{4})([-/])(\d{1,2})\2(\d{1,2}) (\d{1,2}):(\d{1,2}):(\d{1,2})$/)
-  if (!匹配) return ''
+  if (!匹配) return
 
   const [, 年, , 月, 日, 时, 分, 秒] = 匹配
-  const 文字 = `${年}-${月.padStart(2, '0')}-${日.padStart(2, '0')} ${时.padStart(2, '0')}:${分.padStart(2, '0')}:${秒.padStart(2, '0')}`
+  const 字段 = [年, 月, 日, 时, 分, 秒].map(Number)
+  // Date.UTC 会把 0–99 年映射到 1900 年代，年份须用 setUTCFullYear 设置。
+  const 日期 = new Date(0)
+  日期.setUTCFullYear(字段[0], 字段[1] - 1, 字段[2])
+  日期.setUTCHours(字段[3], 字段[4], 字段[5])
+  const 回读 = [
+    日期.getUTCFullYear(),
+    日期.getUTCMonth() + 1,
+    日期.getUTCDate(),
+    日期.getUTCHours(),
+    日期.getUTCMinutes(),
+    日期.getUTCSeconds()
+  ]
+  // 越界字段会被 Date 进位，回读不一致即为非法；纪元记法中没有 0 年。
+  if (字段[0] < 1 || 回读.some((值, 序) => 值 !== 字段[序])) return
 
-  // UTC 仅用于校验日历字段，避免系统夏令时改写输入。
-  return dayjs.utc(文字, 日期格式, true).isValid() ? 文字 : ''
+  return {
+    文字: `${年}-${补零(月)}-${补零(日)} ${补零(时)}:${补零(分)}:${补零(秒)}`,
+    墙钟毫秒: 日期.getTime()
+  }
 }
 
 export function 格式化时区日期(毫秒, 时区) {
@@ -57,20 +74,17 @@ function 取时区偏移(毫秒, 时区) {
 
 // 枚举墙钟时间在某时区对应的所有瞬时：0 个表示该当地时间不存在，
 // 2 个表示夏令时回拨后出现两次。dayjs.tz 对后者的取舍随运行季节漂移，故自行解析。
-export function 解析时区日期(文字, 时区) {
-  const 基准 = Date.parse(`${文字}Z`)
-  if (Number.isNaN(基准)) return []
-
+export function 解析时区日期({ 文字, 墙钟毫秒 }, 时区) {
   // 探测墙钟时间前后各两天的偏移，覆盖转换前后的两种偏移。
   const 偏移集合 = new Set(
-    [基准 - 48 * 3600_000, 基准, 基准 + 48 * 3600_000].map(毫秒 =>
+    [墙钟毫秒 - 48 * 3600_000, 墙钟毫秒, 墙钟毫秒 + 48 * 3600_000].map(毫秒 =>
       取时区偏移(毫秒, 时区)
     )
   )
 
   const 候选 = []
   for (const 秒 of 偏移集合) {
-    const 瞬时 = 基准 - 秒 * 1000
+    const 瞬时 = 墙钟毫秒 - 秒 * 1000
     const 结果 = 格式化时区日期(瞬时, 时区)
     if (结果.文字 === 文字) {
       候选.push({ 毫秒: 瞬时, 偏移秒: 秒, utc偏移: 结果.utc偏移 })

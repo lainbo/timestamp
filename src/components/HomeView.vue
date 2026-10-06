@@ -207,7 +207,7 @@ import SmoothTransitionIcon from '@/components/SmoothTransitionIcon.vue'
 import { 同步主题偏好 } from '@/utils/theme.js'
 import {
   日期格式,
-  规范化日期,
+  解析日期,
   格式化时区日期,
   解析时区日期
 } from '@/utils/datetime.js'
@@ -359,15 +359,15 @@ function 时间戳转毫秒(时间戳, 单位) {
 
 const 歧义选项 = ref(0)
 
-const 日期候选 = computed(() => {
-  const 日期文字 = 规范化日期(formData.date)
-  return 日期文字 ? 解析时区日期(日期文字, 时区.value) : []
-})
+const 输入日期 = computed(() => 解析日期(formData.date))
+
+const 日期候选 = computed(() =>
+  输入日期.value ? 解析时区日期(输入日期.value, 时区.value) : []
+)
 
 const 日期转换结果 = computed(() => {
   if (!formData.date) return {}
-  if (!规范化日期(formData.date))
-    return { 错误: '日期无效，请检查日期格式和年月日' }
+  if (!输入日期.value) return { 错误: '日期无效，请检查日期格式和年月日' }
 
   const 候选 = 日期候选.value
   if (!候选.length) return { 错误: '该当地时间不存在（夏令时切换）' }
@@ -419,10 +419,9 @@ const formData = reactive({
 })
 
 // UTC 模式仅用于面板保存年月日和时分秒；实际时间戳仍按所选时区解析。
-const 日期面板值 = computed(() => {
-  const 日期文字 = 规范化日期(formData.date)
-  return 日期文字 ? dayjs.utc(日期文字, 日期格式, true) : undefined
-})
+const 日期面板值 = computed(
+  () => 输入日期.value && dayjs.utc(输入日期.value.墙钟毫秒)
+)
 
 async function 填入此刻() {
   const 此刻毫秒 = Math.floor(Date.now() / 1000) * 1000
@@ -503,7 +502,7 @@ const utoolsInit = () => {
       timeInputRef.value.focus()
     }
     if (code === 'date') {
-      formData.date = 规范化日期(payload)
+      formData.date = 解析日期(payload)?.文字 ?? ''
       if (!formData.date) {
         Message.warning({
           content: '日期无效，请检查日期格式和年月日',
