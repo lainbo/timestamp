@@ -5,7 +5,7 @@ settings:
   excludeLinksFromLockfile: false
 
 patchedDependencies:
-  '@arco-design/web-vue@2.59.0': a023cd840e6c0ca5c493b7b53a13acddaa06064ca618b2a1164436fd3fb7441b
+  '@arco-design/web-vue@2.59.0': 31f74b31c0fa53537bda6ce70952a8a6d709fcd655816696ec6dc7a073264f89
 
 importers:
 
@@ -13,7 +13,7 @@ importers:
     dependencies:
       '@arco-design/web-vue':
         specifier: ^2.59.0
-        version: 2.59.0(patch_hash=a023cd840e6c0ca5c493b7b53a13acddaa06064ca618b2a1164436fd3fb7441b)(vue@3.5.45)
+        version: 2.59.0(patch_hash=31f74b31c0fa53537bda6ce70952a8a6d709fcd655816696ec6dc7a073264f89)(vue@3.5.45)
       '@vueuse/core':
         specifier: ^14.4.0
         version: 14.4.0(vue@3.5.45)
@@ -1665,7 +1665,7 @@ snapshots:
     dependencies:
       color: 3.2.1
 
-  '@arco-design/web-vue@2.59.0(patch_hash=a023cd840e6c0ca5c493b7b53a13acddaa06064ca618b2a1164436fd3fb7441b)(vue@3.5.45)':
+  '@arco-design/web-vue@2.59.0(patch_hash=31f74b31c0fa53537bda6ce70952a8a6d709fcd655816696ec6dc7a073264f89)(vue@3.5.45)':
     dependencies:
       '@arco-design/color': 0.4.0
       b-tween: 0.3.3

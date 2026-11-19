@@ -1,3 +1,16 @@
+diff --git a/es/date-picker/panels/date/index.js b/es/date-picker/panels/date/index.js
+index fe70070489930d81f1f6d619091c6a39ac50c917..59b4576223131fff78d499b16ff23c37c0afd533 100644
+--- a/es/date-picker/panels/date/index.js
++++ b/es/date-picker/panels/date/index.js
+@@ -284,6 +284,8 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
+       }, {
+         "hide-footer": "",
+         value: _ctx.value || _ctx.isRange ? _ctx.timePickerValue : void 0,
++        // 日期面板为空时时间面板收不到值，单独传入 UTC 模式，避免点选时间按当地时间解析。
++        utc: _ctx.timePickerValue?.isUTC?.(),
+         disabled: _ctx.disabled,
+         onSelect: _ctx.onTimePanelSelect
+       }), null, 16, ["value", "disabled", "onSelect"])
 diff --git a/es/date-picker/utils/index.js b/es/date-picker/utils/index.js
 index f17db7ba7bb7e851f78b56bd920e2affe4e5df85..089c1fd3cfa77e8514b1c5b0b19cb8176fc9a8b2 100644
 --- a/es/date-picker/utils/index.js
@@ -14,21 +27,44 @@ index f17db7ba7bb7e851f78b56bd920e2affe4e5df85..089c1fd3cfa77e8514b1c5b0b19cb817
  }
  function isDisabledDate(cellDate, disabledDate, mode = "date") {
 diff --git a/es/time-picker/panel.js b/es/time-picker/panel.js
-index 47ac4fc27e07eb5e800545a2c6500dbef716d1af..191e1bc36d01f06e25f6e425b3d6c0a4912ab14c 100644
+index 47ac4fc27e07eb5e800545a2c6500dbef716d1af..073f3183d57ae248fa93f80f0baf6d92fb8aaa30 100644
 --- a/es/time-picker/panel.js
 +++ b/es/time-picker/panel.js
-@@ -180,7 +180,10 @@ const _sfc_main = defineComponent({
+@@ -47,6 +47,9 @@ const _sfc_main = defineComponent({
+     hideFooter: {
+       type: Boolean
+     },
++    utc: {
++      type: Boolean
++    },
+     isRange: {
+       type: Boolean
+     },
+@@ -180,7 +183,10 @@ const _sfc_main = defineComponent({
            newValue = `${newValue} ${ampm}`;
          }
        }
 -      newValue = dayjs(newValue, valueFormat);
 +      // 沿用面板的 UTC 模式，避免在系统夏令时空缺时段重新按当地时间解析。
-+      newValue = selectedValue.value?.isUTC?.()
++      newValue = props.utc || selectedValue.value?.isUTC?.()
 +        ? dayjs.utc(newValue, valueFormat)
 +        : dayjs(newValue, valueFormat);
        emitSelect(newValue);
      }
      return {
+diff --git a/lib/date-picker/panels/date/index.js b/lib/date-picker/panels/date/index.js
+index f781e256faf63e05e56111d0fbcee637ae702810..b76e0e25eb98db632894b8d0473853769f8f2f23 100644
+--- a/lib/date-picker/panels/date/index.js
++++ b/lib/date-picker/panels/date/index.js
+@@ -285,6 +285,8 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
+       }, {
+         "hide-footer": "",
+         value: _ctx.value || _ctx.isRange ? _ctx.timePickerValue : void 0,
++        // 日期面板为空时时间面板收不到值，单独传入 UTC 模式，避免点选时间按当地时间解析。
++        utc: _ctx.timePickerValue?.isUTC?.(),
+         disabled: _ctx.disabled,
+         onSelect: _ctx.onTimePanelSelect
+       }), null, 16, ["value", "disabled", "onSelect"])
 diff --git a/lib/date-picker/utils/index.js b/lib/date-picker/utils/index.js
 index 6b3ef6b44f66c91a141fa6bcc80bbdc7affac575..11b305d2f605f881d5832a24c9c51e9884541e53 100644
 --- a/lib/date-picker/utils/index.js
@@ -45,16 +81,26 @@ index 6b3ef6b44f66c91a141fa6bcc80bbdc7affac575..11b305d2f605f881d5832a24c9c51e98
  }
  function isDisabledDate(cellDate, disabledDate, mode = "date") {
 diff --git a/lib/time-picker/panel.js b/lib/time-picker/panel.js
-index 86bdbfdd819f6254502c3e94a8776936c3aac67f..9c80defa6cc778de7e321f95cbbb54432413fab2 100644
+index 86bdbfdd819f6254502c3e94a8776936c3aac67f..b984281bd610bc8574000e4f02b444f2d7fa1f85 100644
 --- a/lib/time-picker/panel.js
 +++ b/lib/time-picker/panel.js
-@@ -181,7 +181,10 @@ const _sfc_main = vue.defineComponent({
+@@ -48,6 +48,9 @@ const _sfc_main = vue.defineComponent({
+     hideFooter: {
+       type: Boolean
+     },
++    utc: {
++      type: Boolean
++    },
+     isRange: {
+       type: Boolean
+     },
+@@ -181,7 +184,10 @@ const _sfc_main = vue.defineComponent({
            newValue = `${newValue} ${ampm}`;
          }
        }
 -      newValue = date.dayjs(newValue, valueFormat);
 +      // 沿用面板的 UTC 模式，避免在系统夏令时空缺时段重新按当地时间解析。
-+      newValue = selectedValue.value?.isUTC?.()
++      newValue = props.utc || selectedValue.value?.isUTC?.()
 +        ? date.dayjs.utc(newValue, valueFormat)
 +        : date.dayjs(newValue, valueFormat);
        emitSelect(newValue);
