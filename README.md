@@ -34,14 +34,14 @@ pnpm run up        # 交互式检查依赖更新（npm-check-updates）
 
 ## Arco 依赖补丁
 
-通过 pnpm 原生补丁维护 `@arco-design/web-vue@2.58.0`，安装依赖时自动应用。补丁文件位于 `patches/`，由 `pnpm-workspace.yaml` 的 `patchedDependencies` 注册，并记录在锁文件中。
+通过 pnpm 原生补丁维护 `@arco-design/web-vue@2.59.0`，安装依赖时自动应用。补丁文件位于 `patches/`，由 `pnpm-workspace.yaml` 的 `patchedDependencies` 注册，并记录在锁文件中。
 
 补丁只修改日期与时间合并、时间面板点选后的解析，覆盖 ESM 和 CommonJS 入口。面板收到 UTC 模式的 Day.js 实例时保留该模式，普通当地时间实例保持原行为。`HomeView.vue` 负责将有效日期文字转换为 UTC 面板值；这些实例仅承载日期字段，实际时间戳由 `解析时区日期` 按所选时区计算。
 
 修改现有补丁：
 
 ```bash
-pnpm patch @arco-design/web-vue@2.58.0
+pnpm patch @arco-design/web-vue@2.59.0
 # 修改命令输出的临时目录
 pnpm patch-commit <临时目录>
 ```
