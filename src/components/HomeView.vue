@@ -32,7 +32,6 @@
           size="large"
         >
           <a-form-item
-            ref="日期表单项引用"
             :label="`日期（${日期时区文字}）→ 时间戳：`"
             :validate-status="日期转换结果.错误 ? 'error' : undefined"
             :help="日期转换结果.错误"
@@ -66,29 +65,17 @@
                 </a-radio-group>
               </div>
             </template>
-            <a-date-picker
-              :model-value="日期面板值"
+            <DateTimePicker
+              v-model="formData.date"
               v-model:popup-visible="日期选择器可见"
               :style="{ width: '380px' }"
-              :trigger-props="{ contentClass: 'timestamp-date-picker-popup' }"
-              show-time
-              :show-now-btn="false"
-              :time-picker-props="{
-                defaultValue: dayjs().utc(true).startOf('day')
-              }"
-              :format="日期格式"
-              :value-format="日期格式"
-              @input.capture.stop="接管手输"
-              @update:model-value="接收面板日期"
-              @select="手输中 = false"
-              @vue:updated="同步输入框"
             >
               <template #extra>
                 <a-button type="text" size="mini" @click="填入此刻">
                   此刻
                 </a-button>
               </template>
-            </a-date-picker>
+            </DateTimePicker>
             <a-tooltip
               :content="`点击复制 / ${timeStampShortcut}`"
               position="top"
@@ -213,16 +200,11 @@ import {
   useStorage,
   whenever
 } from '@vueuse/core'
-import dayjs from 'dayjs'
 import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
+import DateTimePicker from '@/components/DateTimePicker.vue'
 import SettingsModal from '@/components/SettingsModal.vue'
 import SmoothTransitionIcon from '@/components/SmoothTransitionIcon.vue'
-import {
-  日期格式,
-  解析日期,
-  格式化时区日期,
-  解析时区日期
-} from '@/utils/datetime.js'
+import { 解析日期, 格式化时区日期, 解析时区日期 } from '@/utils/datetime.js'
 import {
   构建时区选项,
   合法时区集合,
@@ -385,11 +367,6 @@ const formData = reactive({
   time: undefined // 时间戳
 })
 
-// UTC 模式仅用于面板保存年月日和时分秒；实际时间戳仍按所选时区解析。
-const 日期面板值 = computed(
-  () => 输入日期.value && dayjs.utc(输入日期.value.墙钟毫秒)
-)
-
 async function 填入此刻() {
   const 此刻毫秒 = Math.floor(Date.now() / 1000) * 1000
   formData.date = 格式化时区日期(此刻毫秒, 时区.value).文字
@@ -400,32 +377,9 @@ async function 填入此刻() {
   歧义选项.value = 日期候选.value[1]?.毫秒 === 此刻毫秒 ? 1 : 0
 }
 
-const 日期表单项引用 = ref()
-const 手输中 = ref(false)
-
-// 在捕获阶段保存原文，阻止 Arco 按系统时区重新解析手输日期。
-function 接管手输(事件) {
-  手输中.value = true
-  formData.date = 事件.target.value
-}
-
-// 确认按钮可能仍携带上一次面板选择；手输后只接收新的面板点选或清空。
-function 接收面板日期(日期) {
-  if (!手输中.value || 日期 === undefined) formData.date = 日期 ?? ''
-}
-
 watch([() => formData.date, 时区], () => {
   歧义选项.value = 0
 })
-
-// 面板只接收有效日期，输入框按原文回填，保留手输的格式、小数秒及未完成文本。
-function 同步输入框() {
-  const 输入框 = 日期表单项引用.value.$el.querySelector('.arco-picker input')
-  if (输入框.value !== formData.date) 输入框.value = formData.date
-}
-
-// 输入和弹层切换后回填；表单内其他内容变化也会让 Arco 重绘输入框，由 @vue:updated 回填。
-watch([() => formData.date, 日期选择器可见], () => nextTick(同步输入框))
 
 onMounted(() => {
   if (!window?.utools) return
@@ -521,15 +475,6 @@ async function 复制(str = '') {
 </script>
 
 <style lang="scss" scoped>
-:global(.timestamp-date-picker-popup .arco-picker-footer) {
-  display: grid;
-  grid-template-columns: 1fr auto;
-}
-
-:global(.timestamp-date-picker-popup .arco-picker-footer-extra-wrapper) {
-  padding-left: 12px;
-}
-
 .contain,
 .card {
   transition: all 0.4s ease;

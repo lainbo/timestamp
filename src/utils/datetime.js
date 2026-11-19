@@ -2,6 +2,15 @@ export const 日期格式 = 'YYYY-MM-DD HH:mm:ss'
 
 const 补零 = 值 => 值.padStart(2, '0')
 
+// 把年月日时分秒当作 UTC 墙钟时间换算成毫秒数，不受系统时区的夏令时影响。
+// Date.UTC 会把 0–99 年映射到 1900 年代，年份须用 setUTCFullYear 设置。
+export function 墙钟转毫秒(年, 月, 日, 时 = 0, 分 = 0, 秒 = 0) {
+  const 日期 = new Date(0)
+  日期.setUTCFullYear(年, 月 - 1, 日)
+  日期.setUTCHours(时, 分, 秒)
+  return 日期.getTime()
+}
+
 // 返回规范化的日期文字、精确到秒的部分、把后者当作 UTC 墙钟时间得到的毫秒数，
 // 以及小数秒对应的纳秒数；非法日期返回 undefined。
 export function 解析日期(输入) {
@@ -14,10 +23,7 @@ export function 解析日期(输入) {
 
   const [, 年, , 月, 日, 时, 分, 秒, 小数 = ''] = 匹配
   const 字段 = [年, 月, 日, 时, 分, 秒].map(Number)
-  // Date.UTC 会把 0–99 年映射到 1900 年代，年份须用 setUTCFullYear 设置。
-  const 日期 = new Date(0)
-  日期.setUTCFullYear(字段[0], 字段[1] - 1, 字段[2])
-  日期.setUTCHours(字段[3], 字段[4], 字段[5])
+  const 日期 = new Date(墙钟转毫秒(...字段))
   const 回读 = [
     日期.getUTCFullYear(),
     日期.getUTCMonth() + 1,

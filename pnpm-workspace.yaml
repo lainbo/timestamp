@@ -2,5 +2,3 @@ allowBuilds:
   '@parcel/watcher': true
   esbuild: true
   vue-demi: true
-patchedDependencies:
-  '@arco-design/web-vue@2.59.0': patches/@arco-design__web-vue@2.59.0.patch
