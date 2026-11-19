@@ -32,6 +32,7 @@
           size="large"
         >
           <a-form-item
+            ref="日期表单项引用"
             :label="`日期（${日期时区文字}）→ 时间戳：`"
             :validate-status="日期转换结果.错误 ? 'error' : undefined"
             :help="日期转换结果.错误"
@@ -66,7 +67,6 @@
               </div>
             </template>
             <a-date-picker
-              ref="日期选择器引用"
               :model-value="日期面板值"
               v-model:popup-visible="日期选择器可见"
               :style="{ width: '380px' }"
@@ -81,6 +81,7 @@
               @input.capture.stop="接管手输"
               @update:model-value="接收面板日期"
               @select="手输中 = false"
+              @vue:updated="同步输入框"
             >
               <template #extra>
                 <a-button type="text" size="mini" @click="填入此刻">
@@ -121,7 +122,19 @@
                 class="inline-block ml-16px cursor-pointer font-bold text-16px dynamic_timestamp dark:text-white"
                 @click="复制(timeText)"
               >
-                {{ timeText || '-' }}
+                <template v-if="时间戳转换结果">
+                  <span>{{ 时间戳转换结果.文字 }}</span>
+                  <span
+                    v-if="时间戳转换结果.小数秒组.length"
+                    class="fractional-seconds"
+                    >.<span
+                      v-for="(组, 序) in 时间戳转换结果.小数秒组"
+                      :key="序"
+                      >{{ 组 }}</span
+                    ></span
+                  >
+                </template>
+                <template v-else>-</template>
               </span>
             </a-tooltip>
           </a-form-item>
@@ -284,29 +297,30 @@ const 时间戳类型 = useStorage('defaultUnit', 'ms') // 单选框值，默认
 const 时间戳单位文字 = computed(
   () => ({ ns: '纳秒', ms: '毫秒', s: '秒' })[时间戳类型.value]
 )
-const 每秒毫秒数 = 1000n
 const 每毫秒纳秒数 = 1000000n
+const 每秒纳秒数 = 1000000000n
+const 单位纳秒数 = { s: 每秒纳秒数, ms: 每毫秒纳秒数, ns: 1n }
 const 日期最大毫秒数 = 8640000000000000n
 
-function 格式化时间戳(毫秒, 单位) {
-  const 毫秒整数 = BigInt(毫秒)
-
-  if (单位 === 's') return (毫秒整数 / 每秒毫秒数).toString()
-  if (单位 === 'ms') return 毫秒整数.toString()
-  return (毫秒整数 * 每毫秒纳秒数).toString()
+// BigInt 除法向零截断，1970 年以前的时间须向下取整。
+function 向下整除(被除数, 除数) {
+  const 商 = 被除数 / 除数
+  return 被除数 % 除数 < 0n ? 商 - 1n : 商
 }
 
-function 纳秒转毫秒(纳秒) {
-  const 毫秒 = 纳秒 / 每毫秒纳秒数
-  const 存在不足一毫秒的负数余数 = 纳秒 < 0n && 纳秒 % 每毫秒纳秒数 !== 0n
-
-  return 存在不足一毫秒的负数余数 ? 毫秒 - 1n : 毫秒
+function 格式化时间戳(纳秒, 单位) {
+  return 向下整除(纳秒, 单位纳秒数[单位]).toString()
 }
 
-function 时间戳转毫秒(时间戳, 单位) {
-  if (单位 === 's') return 时间戳 * 每秒毫秒数
-  if (单位 === 'ms') return 时间戳
-  return 纳秒转毫秒(时间戳)
+// 小数秒按三位一组，去掉末尾全为 0 的组，依精度保留 3、6 或 9 位，整秒为空数组。
+function 小数秒分组(纳秒) {
+  return (
+    (纳秒 - 向下整除(纳秒, 每秒纳秒数) * 每秒纳秒数)
+      .toString()
+      .padStart(9, '0')
+      .replace(/(?:000)+$/, '')
+      .match(/\d{3}/g) ?? []
+  )
 }
 
 const 歧义选项 = ref(0)
@@ -336,17 +350,22 @@ const timeStampText = computed(() => {
   const 毫秒 = 日期转换结果.value.毫秒
   if (毫秒 === undefined) return '-'
 
-  return 格式化时间戳(毫秒, 时间戳类型.value)
+  const 纳秒 = BigInt(毫秒) * 每毫秒纳秒数 + 输入日期.value.秒内纳秒
+  return 格式化时间戳(纳秒, 时间戳类型.value)
 })
 
 const 时间戳转换结果 = computed(() => {
   const 输入文字 = String(formData.time ?? '').trim()
   if (!/^-?\d+$/.test(输入文字)) return undefined
 
-  const 毫秒 = 时间戳转毫秒(BigInt(输入文字), 时间戳类型.value)
+  const 纳秒 = BigInt(输入文字) * 单位纳秒数[时间戳类型.value]
+  const 毫秒 = 向下整除(纳秒, 每毫秒纳秒数)
   if (毫秒 > 日期最大毫秒数 || 毫秒 < -日期最大毫秒数) return undefined
 
-  return 格式化时区日期(Number(毫秒), 时区.value)
+  return {
+    ...格式化时区日期(Number(毫秒), 时区.value),
+    小数秒组: 小数秒分组(纳秒)
+  }
 })
 
 const 时间戳时区文字 = computed(() =>
@@ -354,7 +373,11 @@ const 时间戳时区文字 = computed(() =>
 )
 
 // 时间戳 → 日期后面的文字
-const timeText = computed(() => 时间戳转换结果.value?.文字 ?? '-')
+const timeText = computed(() => {
+  const 结果 = 时间戳转换结果.value
+  if (!结果) return '-'
+  return [结果.文字, 结果.小数秒组.join('')].filter(Boolean).join('.')
+})
 
 // 两个输入框
 const formData = reactive({
@@ -377,14 +400,12 @@ async function 填入此刻() {
   歧义选项.value = 日期候选.value[1]?.毫秒 === 此刻毫秒 ? 1 : 0
 }
 
-const 日期选择器引用 = ref()
-let 输入框元素 = null
+const 日期表单项引用 = ref()
 const 手输中 = ref(false)
 
 // 在捕获阶段保存原文，阻止 Arco 按系统时区重新解析手输日期。
 function 接管手输(事件) {
   手输中.value = true
-  输入框元素 = 事件.target
   formData.date = 事件.target.value
 }
 
@@ -397,14 +418,14 @@ watch([() => formData.date, 时区], () => {
   歧义选项.value = 0
 })
 
-// 面板只接收有效日期，输入和弹层切换后保留手输的格式及未完成文本。
-watch([() => formData.date, 日期选择器可见], () => {
-  nextTick(() => {
-    const 输入框 =
-      输入框元素 ?? 日期选择器引用.value?.$el?.querySelector('input')
-    if (输入框 && 输入框.value !== formData.date) 输入框.value = formData.date
-  })
-})
+// 面板只接收有效日期，输入框按原文回填，保留手输的格式、小数秒及未完成文本。
+function 同步输入框() {
+  const 输入框 = 日期表单项引用.value.$el.querySelector('.arco-picker input')
+  if (输入框.value !== formData.date) 输入框.value = formData.date
+}
+
+// 输入和弹层切换后回填；表单内其他内容变化也会让 Arco 重绘输入框，由 @vue:updated 回填。
+watch([() => formData.date, 日期选择器可见], () => nextTick(同步输入框))
 
 onMounted(() => {
   if (!window?.utools) return
@@ -413,7 +434,7 @@ onMounted(() => {
 
 const 当前毫秒 = ref(Date.now())
 const 底部动态时间戳 = computed(() =>
-  格式化时间戳(当前毫秒.value, 时间戳类型.value)
+  格式化时间戳(BigInt(当前毫秒.value) * 每毫秒纳秒数, 时间戳类型.value)
 )
 const 按钮停止状态 = ref(false) // 按钮状态，是否停止
 
@@ -517,6 +538,15 @@ async function 复制(str = '') {
   // 等宽数字
   font-feature-settings: 'tnum';
   font-variant-numeric: tabular-nums;
+}
+
+.fractional-seconds {
+  font-weight: normal;
+  color: var(--color-text-3);
+
+  span + span {
+    margin-left: 0.25em;
+  }
 }
 
 .ambiguous-time {
